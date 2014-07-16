@@ -20,7 +20,24 @@ namespace Tennis
 
         ArrayList BoundPositions = new ArrayList();
 
+        Microsoft.Office.Interop.Excel.Application exelApp;
+        Microsoft.Office.Interop.Excel.Workbook wb;
 
+        class CourtSetting
+        {
+
+            public float scale;
+            public Point origin;
+
+        }
+        CourtSetting courtSet = new CourtSetting();
+        int rary_num =1;
+        void setCourtsetting( Panel panel)
+        {
+            courtSet.scale = 10.97f / panel.Width/2.0f; //[m/pixel]
+            //クリックした点を円で描画
+            courtSet.origin = new Point(panel.Width / 2, panel.Height / 2);
+        }
         public Form1()
         {
             //初期設定を書く
@@ -29,11 +46,39 @@ namespace Tennis
             this.Court.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawCourt);
             this.Court.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ClickCourt);
 
+            //ファイルダイアログを開く
+            DialogResult res = openFileDialog1.ShowDialog();
+
+            //開くボタンを押したとき
+            if (res == System.Windows.Forms.DialogResult.OK)
+            {
+                string fileName  = openFileDialog1.FileName;
+                exelApp = new Microsoft.Office.Interop.Excel.Application();
+                exelApp.Visible = true;
+                wb = exelApp.Workbooks.Open(Filename: fileName);
+                try
+                {
+                    ((Microsoft.Office.Interop.Excel.Worksheet)wb.Sheets[1]).Select();
+                }
+                catch (Exception ex)
+                {
+                    wb.Close(false);
+                    exelApp.Quit();
+                    MessageBox.Show("開けませんでした");
+                    return;
+                }
+            }
+            else
+            {
+
+            }
+
             //Observeという関数を別に実行する.
             Thread thread = new Thread(Observe);
             thread.Start();
         }
 
+        
         delegate void SetMedia();
 
         private void Observe()
@@ -60,35 +105,25 @@ namespace Tennis
 
         void Output()
         {
-            string fileName = "C:/Users/Taka/Documents/Visual Studio 2012/Projects/Tennis/Tennis/bin/Debug/test.xlsx";
-            Microsoft.Office.Interop.Excel.Application xlApp = new Microsoft.Office.Interop.Excel.Application();//neExel.Application();
-            xlApp.Visible = false;
-
-            Microsoft.Office.Interop.Excel.Workbook wb = xlApp.Workbooks.Open(Filename: fileName);
-            try
-            {
-                ((Microsoft.Office.Interop.Excel.Worksheet)wb.Sheets[1]).Select();
-            }
-            catch (Exception ex)
-            {
-                wb.Close(false);
-                xlApp.Quit();
-                MessageBox.Show("開けませんでした");
-                return;
-            }
-
             Microsoft.Office.Interop.Excel.Range CellRange;
 
             for(int i=0; i<BoundPositions.Count; i++)
             {
-                CellRange = xlApp.Cells[i+1, 1] as Microsoft.Office.Interop.Excel.Range;
-                CellRange.Value2 = ((Point)BoundPositions[i]).X + "," + ((Point)BoundPositions[i]).Y;
-            }
+                Point pos = (Point)BoundPositions[i];
+                Point p = new Point(pos.X - courtSet.origin.X, pos.Y - courtSet.origin.Y);
+                float x = (float)Math.Round(courtSet.scale * p.X, 2, MidpointRounding.AwayFromZero);
+                float y = (float)Math.Round(courtSet.scale * p.Y, 2, MidpointRounding.AwayFromZero);
 
-            wb.Close();
-            xlApp.Quit();
+                CellRange = exelApp.Cells[i+1, rary_num] as Microsoft.Office.Interop.Excel.Range;
+                CellRange.Value2 = x;
+
+                CellRange = exelApp.Cells[i + 1, rary_num+1] as Microsoft.Office.Interop.Excel.Range;
+                CellRange.Value2 = y;
+            }
+            rary_num += 2;
             MessageBox.Show("出力完了");
         }
+
         private void ClickCourt(object sender, MouseEventArgs e)
         {
             //左クリックで新しくバウンド位置を追加
@@ -114,6 +149,7 @@ namespace Tennis
         private void DrawCourt(object sender, PaintEventArgs e)
         {
             Panel panel = (Panel)sender;
+            setCourtsetting(panel);
             Graphics g = e.Graphics;
             Pen pen = new Pen(Color.Black);
          //   g.DrawRectangle(pen, 0, 0, panel.Width/2, panel.Height/2);
@@ -196,6 +232,11 @@ namespace Tennis
                 mediaPlayer.axWindowsMediaPlayer1.URL = openFileDialog1.FileName;
                 mediaPlayer.Show();
             }
+        }
+
+        private void OpenExelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

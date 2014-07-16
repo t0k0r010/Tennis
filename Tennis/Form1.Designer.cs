@@ -44,6 +44,8 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.moviePos = new System.Windows.Forms.Label();
             this.cursorText = new System.Windows.Forms.TextBox();
+            this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
+            this.OpenExelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.serveResult.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -143,7 +145,8 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dougaPlayerToolStripMenuItem});
+            this.dougaPlayerToolStripMenuItem,
+            this.OpenExelToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1149, 31);
@@ -161,7 +164,7 @@
             // 開くToolStripMenuItem
             // 
             this.開くToolStripMenuItem.Name = "開くToolStripMenuItem";
-            this.開くToolStripMenuItem.Size = new System.Drawing.Size(110, 28);
+            this.開くToolStripMenuItem.Size = new System.Drawing.Size(152, 28);
             this.開くToolStripMenuItem.Text = "開く";
             this.開くToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
@@ -201,6 +204,17 @@
             this.cursorText.Name = "cursorText";
             this.cursorText.Size = new System.Drawing.Size(100, 22);
             this.cursorText.TabIndex = 6;
+            // 
+            // openFileDialog2
+            // 
+            this.openFileDialog2.FileName = "openFileDialog2";
+            // 
+            // OpenExelToolStripMenuItem
+            // 
+            this.OpenExelToolStripMenuItem.Name = "OpenExelToolStripMenuItem";
+            this.OpenExelToolStripMenuItem.Size = new System.Drawing.Size(127, 27);
+            this.OpenExelToolStripMenuItem.Text = "エクセルを開く";
+            this.OpenExelToolStripMenuItem.Click += new System.EventHandler(this.OpenExelToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -245,6 +259,8 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Label moviePos;
         private System.Windows.Forms.TextBox cursorText;
+        private System.Windows.Forms.OpenFileDialog openFileDialog2;
+        private System.Windows.Forms.ToolStripMenuItem OpenExelToolStripMenuItem;
     }
 }
 
