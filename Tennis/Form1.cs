@@ -30,14 +30,29 @@ namespace Tennis
             public Point origin;
 
         }
+
         CourtSetting courtSet = new CourtSetting();
         int rary_num =1;
         void setCourtsetting( Panel panel)
         {
-            courtSet.scale = 10.97f / panel.Width/2.0f; //[m/pixel]
+            courtSet.scale = 10.97f / (panel.Width/2.0f); //[m/pixel]
             //クリックした点を円で描画
             courtSet.origin = new Point(panel.Width / 2, panel.Height / 2);
         }
+
+        String MakeFile()
+        {
+            SaveFileDialog saveDialog = new SaveFileDialog();
+
+            if( saveDialog.ShowDialog() == DialogResult.OK)
+            {
+                Console.WriteLine(saveDialog.FileName);
+                return saveDialog.FileName;
+            }
+
+            return "";
+        }
+
         public Form1()
         {
             //初期設定を書く
@@ -46,6 +61,7 @@ namespace Tennis
             this.Court.Paint += new System.Windows.Forms.PaintEventHandler(this.DrawCourt);
             this.Court.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ClickCourt);
 
+            //MakeFile();
             //ファイルダイアログを開く
             DialogResult res = openFileDialog1.ShowDialog();
 
@@ -117,8 +133,9 @@ namespace Tennis
                 CellRange = exelApp.Cells[i+1, rary_num] as Microsoft.Office.Interop.Excel.Range;
                 CellRange.Value2 = x;
 
-                CellRange = exelApp.Cells[i + 1, rary_num+1] as Microsoft.Office.Interop.Excel.Range;
+                CellRange = exelApp.Cells[i+1, rary_num+1] as Microsoft.Office.Interop.Excel.Range;
                 CellRange.Value2 = y;
+              //  Console.WriteLine("out");
             }
             rary_num += 2;
             MessageBox.Show("出力完了");
