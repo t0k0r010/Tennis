@@ -32,6 +32,7 @@ namespace Tennis
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 player.URL = dialog.FileName;
+                player.Ctlcontrols.stop();
             }
         }
 
