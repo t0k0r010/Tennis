@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.serveResult = new System.Windows.Forms.GroupBox();
             this.radioButton5 = new System.Windows.Forms.RadioButton();
@@ -41,10 +42,12 @@
             this.OpenExelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CourtPannel = new System.Windows.Forms.Panel();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
+            this.WMPlayer = new AxWMPLib.AxWindowsMediaPlayer();
             this.groupBox1.SuspendLayout();
             this.serveResult.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.WMPlayer)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -54,11 +57,11 @@
             this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.groupBox1.Controls.Add(this.serveResult);
             this.groupBox1.Controls.Add(this.groupBox2);
-            this.groupBox1.Location = new System.Drawing.Point(369, 28);
+            this.groupBox1.Location = new System.Drawing.Point(348, 28);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(312, 515);
+            this.groupBox1.Size = new System.Drawing.Size(295, 526);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "groupBox1";
@@ -158,7 +161,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1182, 26);
+            this.menuStrip1.Size = new System.Drawing.Size(1242, 26);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -183,19 +186,31 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.CourtPannel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CourtPannel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.CourtPannel.Location = new System.Drawing.Point(11, 27);
+            this.CourtPannel.Location = new System.Drawing.Point(5, 28);
             this.CourtPannel.Margin = new System.Windows.Forms.Padding(2);
             this.CourtPannel.Name = "CourtPannel";
-            this.CourtPannel.Size = new System.Drawing.Size(354, 515);
+            this.CourtPannel.Size = new System.Drawing.Size(339, 526);
             this.CourtPannel.TabIndex = 3;
             // 
             // openFileDialog2
             // 
             this.openFileDialog2.FileName = "openFileDialog2";
             // 
+            // WMPlayer
+            // 
+            this.WMPlayer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.WMPlayer.Enabled = true;
+            this.WMPlayer.Location = new System.Drawing.Point(648, 27);
+            this.WMPlayer.Name = "WMPlayer";
+            this.WMPlayer.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("WMPlayer.OcxState")));
+            this.WMPlayer.Size = new System.Drawing.Size(582, 526);
+            this.WMPlayer.TabIndex = 4;
+            // 
             // Form1
             // 
-            this.ClientSize = new System.Drawing.Size(1182, 547);
+            this.ClientSize = new System.Drawing.Size(1242, 558);
+            this.Controls.Add(this.WMPlayer);
             this.Controls.Add(this.CourtPannel);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
@@ -210,6 +225,7 @@
             this.groupBox2.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.WMPlayer)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -230,6 +246,7 @@
         private System.Windows.Forms.Panel CourtPannel;
         private System.Windows.Forms.OpenFileDialog openFileDialog2;
         private System.Windows.Forms.ToolStripMenuItem OpenExelToolStripMenuItem;
+        private AxWMPLib.AxWindowsMediaPlayer WMPlayer;
     }
 }
 

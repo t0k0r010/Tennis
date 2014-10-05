@@ -15,12 +15,12 @@ namespace Tennis
     public partial class Form1 : Form
     {
         Court court;
-
+        MediaPlayer mediaPlayer;
         //両方とも開いているか
         public static bool IsStarted { 
             get 
             {
-                return ExcelWriter.Available() && MediaPlayerForm.Available(); 
+                return ExcelWriter.Available() && MediaPlayer.Available(); 
             } 
         }
 
@@ -30,7 +30,9 @@ namespace Tennis
             InitializeComponent();
 
 
-            court = new Court(this.CourtPannel);
+            court       = new Court(this.CourtPannel);
+            mediaPlayer = new MediaPlayer(WMPlayer);
+
             this.KeyDown += Form1_KeyDown;
             this.Resize += Form1_Resize;
         }
@@ -54,7 +56,8 @@ namespace Tennis
         //動画を開く
         private void dougaPlayerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MediaPlayerForm.Open();
+           // MediaPlayerForm.Open();
+            MediaPlayer.Instance.Open();
         }
 
         private void Form1_Load(object sender, EventArgs e)

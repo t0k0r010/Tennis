@@ -41,7 +41,7 @@ namespace Tennis
             {
                 BoundPositions_p.Add(new Point(e.X, e.Y));
                 PointF point_m = ToRealUnit(e.X, e.Y);
-                ExcelWriter.Instance.SetBoundPosition(MediaPlayerForm.Instance.GetCurrentTimeText(), point_m.X, point_m.Y);
+                ExcelWriter.Instance.SetBoundPosition(MediaPlayer.Instance.GetCurrentTimeText(), point_m.X, point_m.Y);
             }
             else
             {

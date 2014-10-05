@@ -52,6 +52,7 @@
     <Compile Include="Form1.designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="MediaPlayer.cs" />
     <Compile Include="MediaPlayerForm.cs">
       <SubType>Form</SubType>
     </Compile>
