@@ -198,8 +198,7 @@
             // 
             // WMPlayer
             // 
-            this.WMPlayer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.WMPlayer.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.WMPlayer.Enabled = true;
             this.WMPlayer.Location = new System.Drawing.Point(648, 27);
             this.WMPlayer.Name = "WMPlayer";

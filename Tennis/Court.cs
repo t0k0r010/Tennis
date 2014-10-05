@@ -63,8 +63,15 @@ namespace Tennis
         void SetCourtSize(Panel panel)
         {
             //パネルの半分の大きさにする
-            Width_p  = panel.Width / 2;                                
-            Height_p = (int)Math.Round(Width_p / Width_m * Height_m);
+            if( (panel.Width / Width_m) < (panel.Height / Height_m) )
+            {
+                Width_p = (int) (panel.Width * 0.7f);
+                Height_p = (int)Math.Round(Width_p / Width_m * Height_m);
+            } else
+            {
+                Height_p = (int)(panel.Height*0.7f);
+                Width_p = (int)Math.Round(Height_p / Height_m * Width_m);
+            }
 
             //中心を原点とする.
             Center_p = new Point(panel.Width / 2, panel.Height / 2);
