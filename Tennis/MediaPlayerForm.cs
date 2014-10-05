@@ -35,10 +35,18 @@ namespace Tennis
             }
         }
 
+        public static bool Available()
+        {
+            return Instance != null;
+        }
+
         public MediaPlayerForm(string fileName)
         {
             InitializeComponent();
             axWindowsMediaPlayer1.URL = fileName;
+
+            this.FormClosed += ClosedEvent;
+
         }
 
         public AxWMPLib.AxWindowsMediaPlayer GetMediaPlayer()
@@ -46,7 +54,7 @@ namespace Tennis
             return axWindowsMediaPlayer1;
         }
 
-        //現在の動画の位置を hh:mm:ss:ff で返す
+        //現在の動画の位置を hh:mm:ss で返す
         public string GetCurrentTimeText()
         {
             double time = MediaPlayerForm.Instance.GetMediaPlayer().Ctlcontrols.currentPosition;
@@ -58,6 +66,12 @@ namespace Tennis
             TimeSpan d = TimeSpan.FromSeconds(time);
 
             return d.ToString(@"hh\:mm\:ss");
+        }
+
+        //閉じられた時に呼ばれる
+        void ClosedEvent(Object sender, FormClosedEventArgs e)
+        {
+            Instance = null;
         }
     }
 }

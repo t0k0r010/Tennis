@@ -14,55 +14,52 @@ namespace Tennis
 {
     public partial class Form1 : Form
     {
-        double mediaPos = 0;
-
         Court court;
 
-        MediaPlayerForm mediaPlayer = null;
-
         //両方とも開いているか
-        public static bool IsStarted { get { return ExcelWriter.Instance != null && MediaPlayerForm.Instance != null; } }
+        public static bool IsStarted { 
+            get 
+            {
+                return ExcelWriter.Available() && MediaPlayerForm.Available(); 
+            } 
+        }
+
         public Form1()
         {
             //初期設定を書く
             InitializeComponent();
 
+
             court = new Court(this.CourtPannel);
-            //Observeという関数を別に実行する.
-            Thread thread = new Thread(Observe);
-            thread.Start();
+            this.KeyDown += Form1_KeyDown;
+            this.Resize += Form1_Resize;
         }
 
-
-        delegate void SetMedia();
-
-        private void Observe()
+        void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            while (!this.IsDisposed)
-            {
-                if (mediaPlayer == null || mediaPlayer.GetMediaPlayer().IsDisposed)
-                    continue;
-
-
-                //moviePos.Text = mediaPlayer.GetMediaPlayer().Ctlcontrols.currentPosition.ToString();
-               // mediaPos = mediaPlayer.GetMediaPlayer().Ctlcontrols.currentPosition;
-               // this.Invoke( new SetMedia(SetMediaPos));
-            }
+            
         }
 
-        private void SetMediaPos()
+        void Form1_Resize(object sender, EventArgs e)
         {
-            moviePos.Text = mediaPos.ToString();
+            CourtPannel.Invalidate();
         }
 
+        //エクセルを開く
         private void OpenExelToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ExcelWriter.Open();
         }
 
+        //動画を開く
         private void dougaPlayerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MediaPlayerForm.Open();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

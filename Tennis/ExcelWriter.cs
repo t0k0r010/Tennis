@@ -18,11 +18,16 @@ namespace Tennis
     {
         public static ExcelWriter Instance {get; private set;}
 
+       // System.Diagnostics.Process excelProcess = null;
+        Excel.Application excelApp;
+        Excel.Workbook wb;
+        uint currentRow = 5;   //現在の行番号
+
         //ファイルを開く
         public static void Open()
         {
             //すでにファイルを開いているときは,新しく開きなおすか確認する.
-            if (Instance != null)
+            if ( Available() )
             {
                 if (MessageBox.Show("今あるファイルを閉じて別のファイルを開きますか?", "確認", 
                     MessageBoxButtons.OKCancel) == DialogResult.Cancel)
@@ -45,16 +50,23 @@ namespace Tennis
                 }
                 catch(Exception ex)
                 {
-                    MessageBox.Show("開けませんでした", ex.Message);
+                    MessageBox.Show( ex.Message, "開けませんでした");
                     Instance = null;
                 }
             }
         }
+        public static bool Available()
+        {
+            if (Instance == null || Instance.excelApp == null)
+                return false;
 
-        Microsoft.Office.Interop.Excel.Application excelApp;
-        Microsoft.Office.Interop.Excel.Workbook wb;
+            return Instance.excelApp.Visible;
+        }
 
-        uint currentRow = 5;   //現在の行番号
+        void ClosedEvent(object sender, EventArgs e)
+        {
+            Instance = null;
+        }
 
         ExcelWriter(string fileName)
         {
@@ -74,6 +86,7 @@ namespace Tennis
             }
         }
 
+
         void Close()
         {
             if (excelApp != null)
@@ -85,12 +98,18 @@ namespace Tennis
         //バウンドした座標を書き込む. 
         public void SetBoundPosition(string time, float x, float y)
         {
-            Excel.Range range = excelApp.get_Range("AB" + currentRow, "AC"+currentRow);
+            Excel.Range range = excelApp.get_Range("AB" + currentRow, "AD"+currentRow);
             range.get_Range("A1").Value2 = x;
             range.get_Range("B1").Value2 = y;
-
             excelApp.get_Range("B" + currentRow).Value2 = time;
             currentRow++;
+        }
+
+        //ラリーの終わりの表す線を書き込む
+        public void WriteLine()
+        {
+            Excel.Range range = excelApp.get_Range("A" + currentRow, "AC" + currentRow);
+            range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeTop).Weight = Excel.XlBorderWeight.xlMedium;
         }
 
         //列のテンプレートを作成
@@ -157,5 +176,23 @@ namespace Tennis
             coordinate.get_Range("B3").Value2 = "y";
         }
 
+
+        /*
+        void SetupProcess()
+        {
+            foreach (var p in System.Diagnostics.Process.GetProcesses()) //Get the relevant Excel process.
+            {
+                if (p.MainWindowHandle == new IntPtr(excelApp.Hwnd))
+                {
+                    excelProcess = p;
+                    break;
+                }
+            }
+
+            if (excelProcess != null)
+            {
+                Console.WriteLine("not NULL");
+            }
+        }*/
     }
 }

@@ -40,9 +40,6 @@
             this.dougaPlayerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenExelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CourtPannel = new System.Windows.Forms.Panel();
-            this.cursorPosition = new System.Windows.Forms.Label();
-            this.moviePos = new System.Windows.Forms.Label();
-            this.cursorText = new System.Windows.Forms.TextBox();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
             this.groupBox1.SuspendLayout();
             this.serveResult.SuspendLayout();
@@ -52,13 +49,16 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.groupBox1.Controls.Add(this.serveResult);
             this.groupBox1.Controls.Add(this.groupBox2);
-            this.groupBox1.Location = new System.Drawing.Point(602, 27);
+            this.groupBox1.Location = new System.Drawing.Point(369, 28);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(254, 562);
+            this.groupBox1.Size = new System.Drawing.Size(312, 515);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "groupBox1";
@@ -158,7 +158,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(862, 26);
+            this.menuStrip1.Size = new System.Drawing.Size(1182, 26);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -178,41 +178,16 @@
             // 
             // CourtPannel
             // 
+            this.CourtPannel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.CourtPannel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CourtPannel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.CourtPannel.Location = new System.Drawing.Point(251, 27);
+            this.CourtPannel.Location = new System.Drawing.Point(11, 27);
             this.CourtPannel.Margin = new System.Windows.Forms.Padding(2);
             this.CourtPannel.Name = "CourtPannel";
-            this.CourtPannel.Size = new System.Drawing.Size(347, 539);
+            this.CourtPannel.Size = new System.Drawing.Size(354, 515);
             this.CourtPannel.TabIndex = 3;
-            // 
-            // cursorPosition
-            // 
-            this.cursorPosition.AutoSize = true;
-            this.cursorPosition.Location = new System.Drawing.Point(34, 69);
-            this.cursorPosition.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.cursorPosition.Name = "cursorPosition";
-            this.cursorPosition.Size = new System.Drawing.Size(67, 12);
-            this.cursorPosition.TabIndex = 4;
-            this.cursorPosition.Text = "カーソル位置";
-            // 
-            // moviePos
-            // 
-            this.moviePos.AutoSize = true;
-            this.moviePos.Location = new System.Drawing.Point(37, 116);
-            this.moviePos.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.moviePos.Name = "moviePos";
-            this.moviePos.Size = new System.Drawing.Size(35, 12);
-            this.moviePos.TabIndex = 5;
-            this.moviePos.Text = "label1";
-            // 
-            // cursorText
-            // 
-            this.cursorText.Location = new System.Drawing.Point(37, 155);
-            this.cursorText.Margin = new System.Windows.Forms.Padding(2);
-            this.cursorText.Name = "cursorText";
-            this.cursorText.Size = new System.Drawing.Size(76, 19);
-            this.cursorText.TabIndex = 6;
             // 
             // openFileDialog2
             // 
@@ -220,18 +195,14 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(862, 594);
-            this.Controls.Add(this.cursorText);
-            this.Controls.Add(this.moviePos);
-            this.Controls.Add(this.cursorPosition);
+            this.ClientSize = new System.Drawing.Size(1182, 547);
             this.Controls.Add(this.CourtPannel);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.serveResult.ResumeLayout(false);
             this.serveResult.PerformLayout();
@@ -257,9 +228,6 @@
         private System.Windows.Forms.RadioButton radioButton4;
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.Panel CourtPannel;
-        private System.Windows.Forms.Label cursorPosition;
-        private System.Windows.Forms.Label moviePos;
-        private System.Windows.Forms.TextBox cursorText;
         private System.Windows.Forms.OpenFileDialog openFileDialog2;
         private System.Windows.Forms.ToolStripMenuItem OpenExelToolStripMenuItem;
     }

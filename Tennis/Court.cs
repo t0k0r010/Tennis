@@ -45,6 +45,7 @@ namespace Tennis
             }
             else
             {
+                ExcelWriter.Instance.WriteLine();
                 BoundPositions_p.Clear();
             }
 
