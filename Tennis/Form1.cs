@@ -20,7 +20,7 @@ namespace Tennis
         public static bool IsStarted { 
             get 
             {
-                return ExcelWriter.Available() && MediaPlayer.Available(); 
+                return ExcelWriter.Available(); 
             } 
         }
 
@@ -56,7 +56,6 @@ namespace Tennis
         //動画を開く
         private void dougaPlayerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           // MediaPlayerForm.Open();
             MediaPlayer.Instance.Open();
         }
 
@@ -64,5 +63,17 @@ namespace Tennis
         {
 
         }
+
+        private void PlayerPositionMenuItem_Click(object sender, EventArgs e)
+        {
+            court.CheckBoundPosition = false;
+        }
+
+        private void BoundPositionMenuItem_Click(object sender, EventArgs e)
+        {
+            court.CheckBoundPosition = true;
+        }
+
+
     }
 }

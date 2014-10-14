@@ -21,7 +21,10 @@ namespace Tennis
        // System.Diagnostics.Process excelProcess = null;
         Excel.Application excelApp;
         Excel.Workbook wb;
-        uint currentRow = 5;   //現在の行番号
+
+        //現在の行番号
+        private uint currentRow = 5;    //これは専用のsetterでしかアクセスしないようにする.   
+        public uint CurrentRow { get { return currentRow; } }    //取得専用
 
         //ファイルを開く
         public static void Open()
@@ -95,20 +98,41 @@ namespace Tennis
             }
         }
 
+        //現在見ている行を次に進める.
+        public void MoveToNextLine()
+        {
+            currentRow++;
+        }
+
         //バウンドした座標を書き込む. 
         public void SetBoundPosition(string time, float x, float y)
         {
-            Excel.Range range = excelApp.get_Range("AB" + currentRow, "AD"+currentRow);
+            SetPosition(excelApp.get_Range("AB" + CurrentRow, "AC" + CurrentRow), time, x, y);
+        }
+
+        public void SetHitterPosition(string time, float x, float y)
+        {
+            SetPosition(excelApp.get_Range("AD" + CurrentRow, "AE" + CurrentRow), time, x, y);
+        }
+
+        public void SetRecieverPosition(string time, float x, float y)
+        {
+            SetPosition(excelApp.get_Range("AF" + CurrentRow, "AG" + CurrentRow), time, x, y);
+        }
+
+        // range(1行2列) にx,y座標を入れて, B列に時間を入れる.
+        private void SetPosition(Excel.Range range, string time, float x, float y)
+        {
             range.get_Range("A1").Value2 = x;
             range.get_Range("B1").Value2 = y;
-            excelApp.get_Range("B" + currentRow).Value2 = time;
-            currentRow++;
+
+            excelApp.get_Range("B" + CurrentRow).Value2 = time;
         }
 
         //ラリーの終わりの表す線を書き込む
         public void WriteLine()
         {
-            Excel.Range range = excelApp.get_Range("A" + currentRow, "AC" + currentRow);
+            Excel.Range range = excelApp.get_Range("A" + CurrentRow, "CN" + CurrentRow);
             range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeTop).Weight = Excel.XlBorderWeight.xlMedium;
         }
 
@@ -164,7 +188,8 @@ namespace Tennis
             //サーブの列
             Excel.Range serve = MakeCol("サーブ", "L", "AA");
             /*
-             ここは自分で書いてみてください.
+             サーブの種類の列名を書く
+             * ここは自分で書いてみてください.
              * 小さいラインの書き方は今度教えます.
              */
 
@@ -174,6 +199,14 @@ namespace Tennis
             coordinate.get_Range("A2").Value2 = "バウンド";
             coordinate.get_Range("A3").Value2 = "x";
             coordinate.get_Range("B3").Value2 = "y";
+
+            coordinate.get_Range("C2").Value2 = "打選手";
+            coordinate.get_Range("C3").Value2 = "x";
+            coordinate.get_Range("D3").Value2 = "y";
+
+            coordinate.get_Range("E2").Value2 = "被打選手";
+            coordinate.get_Range("E3").Value2 = "x";
+            coordinate.get_Range("F3").Value2 = "y";
         }
 
 
