@@ -33,6 +33,12 @@
             this.OpenExelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CourtPannel = new System.Windows.Forms.Panel();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
+
+            this.ClickModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.PlayerPositionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.BoundPositionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+
+
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -40,7 +46,8 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dougaPlayerToolStripMenuItem,
-            this.OpenExelToolStripMenuItem});
+            this.OpenExelToolStripMenuItem,
+            this.ClickModeMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
@@ -79,6 +86,31 @@
             // 
             this.openFileDialog2.FileName = "openFileDialog2";
             // 
+
+            // 
+            // ClickModeMenuItem
+            // 
+            this.ClickModeMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.PlayerPositionMenuItem,
+            this.BoundPositionMenuItem});
+            this.ClickModeMenuItem.Name = "ClickModeMenuItem";
+            this.ClickModeMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.ClickModeMenuItem.Text = "クリック対象";
+            // 
+            // PlayerPositionMenuItem
+            // 
+            this.PlayerPositionMenuItem.Name = "PlayerPositionMenuItem";
+            this.PlayerPositionMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.PlayerPositionMenuItem.Text = "選手位置";
+            this.PlayerPositionMenuItem.Click += new System.EventHandler(this.PlayerPositionMenuItem_Click);
+            // 
+            // BoundPositionMenuItem
+            // 
+            this.BoundPositionMenuItem.Name = "BoundPositionMenuItem";
+            this.BoundPositionMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.BoundPositionMenuItem.Text = "バウンド位置";
+            this.BoundPositionMenuItem.Click += new System.EventHandler(this.BoundPositionMenuItem_Click);
+            // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(1242, 558);
@@ -102,6 +134,10 @@
         private System.Windows.Forms.Panel CourtPannel;
         private System.Windows.Forms.OpenFileDialog openFileDialog2;
         private System.Windows.Forms.ToolStripMenuItem OpenExelToolStripMenuItem;
+
+        private System.Windows.Forms.ToolStripMenuItem ClickModeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem PlayerPositionMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem BoundPositionMenuItem;
     }
 }
 

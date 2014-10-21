@@ -22,13 +22,31 @@ namespace Tennis
         List<Point> BoundPositions_p = new List<Point>();
 
         Panel Panel;
+
+        Label infomation;
+
+        public bool IsPlayerA { get;  private set;  }
+
+        public bool CheckBoundPosition { get; private set; }
+
+        public void SetCheckBoundPosition(bool bound)
+        {
+            if (CheckBoundPosition == bound)
+                return;
+
+            CheckBoundPosition = bound;
+            ExcelWriter.Instance.MoveToFistLine();
+        }
+
         public Court(Panel panel)
         {
             this.Panel = panel;
             panel.Paint += new System.Windows.Forms.PaintEventHandler(Draw);
             panel.MouseClick += MouseClick;
-
             SetCourtSize(panel);
+
+            infomation = new Label();
+            infomation.Parent = Panel;
         }
 
         //コートをクリック => バウンド位置を設定
@@ -37,19 +55,60 @@ namespace Tennis
             if (!Form1.IsStarted)
                 return;
 
+            if (CheckBoundPosition)
+                ClickedBoundPosition(sender, e);
+            else
+                ClickedPlayerPosition(sender, e);
+            Panel.Invalidate(); //再描画命令
+        }
+
+        void ChangeIndicator()
+        {
+            infomation.Text = IsPlayerA ? "PlayerA" : "PlayerB";
+        }
+
+        //バウンド地点を書き出す
+        void ClickedBoundPosition(object sender, MouseEventArgs e)
+        {
             if (e.Button == MouseButtons.Left)
             {
                 BoundPositions_p.Add(new Point(e.X, e.Y));
                 PointF point_m = ToRealUnit(e.X, e.Y);
-                ExcelWriter.Instance.SetBoundPosition(/*MediaPlayer.Instance.GetCurrentTimeText()*/"null", point_m.X, point_m.Y);
+
+                ExcelWriter.Instance.SetBoundPosition("no time", point_m.X, point_m.Y);
+                ExcelWriter.Instance.MoveToNextLine();  //次のラインへ
             }
             else
             {
                 ExcelWriter.Instance.WriteLine();
                 BoundPositions_p.Clear();
             }
+        }
 
-            Panel.Invalidate(); //再描画命令
+        void ClickedPlayerPosition(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                BoundPositions_p.Add(new Point(e.X, e.Y));
+                PointF point_m = ToRealUnit(e.X, e.Y);
+
+                if(IsPlayerA)
+                {
+                    ExcelWriter.Instance.SetRecieverPosition("no time", point_m.X, point_m.Y);
+                    ExcelWriter.Instance.MoveToNextLine();  //次のラインへ
+                }
+                else
+                {
+                    ExcelWriter.Instance.SetHitterPosition("no time", point_m.X, point_m.Y);
+                }
+
+                IsPlayerA = !IsPlayerA;
+            }
+            else
+            {
+                ExcelWriter.Instance.WriteLine();
+                BoundPositions_p.Clear();
+            }
         }
 
         void Draw(Object panel, PaintEventArgs e)
