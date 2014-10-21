@@ -194,6 +194,25 @@ namespace Tennis
             g.DrawLine(pen,
                 Center_p.X - singleCourtWidth_p / 2, Center_p.Y + serviceLineHeight_p,    //下のライン
                 Center_p.X + singleCourtWidth_p / 2, Center_p.Y + serviceLineHeight_p);
+            
+
+            //センターマークの描画
+
+            //サーブ補助線の描画
+            int SupportLineHeight_p = MeterToPixel(1); //1mをpixelに変換
+
+            
+            g.DrawLine(pen,
+                Center_p.X, Center_p.Y - Height_p / 2,
+                Center_p.X, Center_p.Y - Height_p / 2 + SupportLineHeight_p / 5);
+             
+            
+            g.DrawLine(pen,
+                Center_p.X, Center_p.Y + Height_p / 2,
+                Center_p.X, Center_p.Y + Height_p / 2 - SupportLineHeight_p / 5);
+
+            //本来であればセンターマークは10㎝だが，見やすさ重視で20㎝に変換する
+            
 
             //中心のラインの描画
             g.DrawLine(pen,
@@ -205,13 +224,13 @@ namespace Tennis
             g.DrawLine(pen,
                 Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y,
                 Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y);
-
+            
             //破線に変更
             pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
 
             //サーブ補助線の描画
-            int SupportLineHeight_p = MeterToPixel(1); //1mをpixelに変換
-
+           // int SupportLineHeight_p = MeterToPixel(1); //1mをpixelに変換
+            
             g.DrawLine(pen,
                 Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y + Height_p / 2 - SupportLineHeight_p,
                  Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y + Height_p / 2 - SupportLineHeight_p);
@@ -228,14 +247,14 @@ namespace Tennis
                 Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y - Height_p / 2 - SupportLineHeight_p,
                 Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y - Height_p / 2 - SupportLineHeight_p);
 
-
+            
         }
 
         //バウンド跡を描画
         void DrawBoundMarks(Graphics g)
         {
             Pen pen = new Pen(Color.Red);
-            int markerSize = Width_p / 10;
+            int markerSize = Width_p / 20;
             foreach (Point p in BoundPositions_p)
             {
                 g.DrawEllipse(pen, p.X - markerSize / 2, p.Y - markerSize / 2, markerSize, markerSize);
