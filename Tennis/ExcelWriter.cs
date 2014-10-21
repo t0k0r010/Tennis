@@ -101,7 +101,7 @@ namespace Tennis
             Excel.Range range = excelApp.get_Range("AB" + currentRow, "AD"+currentRow);
             range.get_Range("A1").Value2 = x;
             range.get_Range("B1").Value2 = y;
-            excelApp.get_Range("B" + currentRow).Value2 = time;
+           // excelApp.get_Range("B" + currentRow).Value2 = time;
             currentRow++;
         }
 

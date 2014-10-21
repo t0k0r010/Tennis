@@ -20,7 +20,7 @@ namespace Tennis
         public static bool IsStarted { 
             get 
             {
-                return ExcelWriter.Available() && MediaPlayer.Available(); 
+                return ExcelWriter.Available() /*&& MediaPlayer.Available()*/; 
             } 
         }
 
@@ -31,7 +31,7 @@ namespace Tennis
 
 
             court       = new Court(this.CourtPannel);
-            mediaPlayer = new MediaPlayer(WMPlayer);
+          //  mediaPlayer = new MediaPlayer(WMPlayer);
 
             this.KeyDown += Form1_KeyDown;
             this.Resize += Form1_Resize;
@@ -61,6 +61,11 @@ namespace Tennis
         }
 
         private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
         {
 
         }

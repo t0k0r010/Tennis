@@ -41,7 +41,7 @@ namespace Tennis
             {
                 BoundPositions_p.Add(new Point(e.X, e.Y));
                 PointF point_m = ToRealUnit(e.X, e.Y);
-                ExcelWriter.Instance.SetBoundPosition(MediaPlayer.Instance.GetCurrentTimeText(), point_m.X, point_m.Y);
+                ExcelWriter.Instance.SetBoundPosition(/*MediaPlayer.Instance.GetCurrentTimeText()*/"null", point_m.X, point_m.Y);
             }
             else
             {
@@ -140,6 +140,36 @@ namespace Tennis
             g.DrawLine(pen,
                Center_p.X, Center_p.Y - serviceLineHeight_p,
                Center_p.X, Center_p.Y + serviceLineHeight_p);
+
+            //ネットの描画
+            int SupportLineWidth_p = MeterToPixel(0.91f);
+            g.DrawLine(pen,
+                Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y,
+                Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y);
+
+            //破線に変更
+            pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+
+            //サーブ補助線の描画
+            int SupportLineHeight_p = MeterToPixel(1); //1mをpixelに変換
+
+            g.DrawLine(pen,
+                Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y + Height_p / 2 - SupportLineHeight_p,
+                 Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y + Height_p / 2 - SupportLineHeight_p);
+
+            g.DrawLine(pen,
+                Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y + Height_p / 2 + SupportLineHeight_p,
+                Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y + Height_p / 2 + SupportLineHeight_p);
+
+            g.DrawLine(pen,
+                Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y - Height_p / 2 + SupportLineHeight_p,
+                Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y - Height_p / 2 + SupportLineHeight_p);
+
+            g.DrawLine(pen,
+                Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y - Height_p / 2 - SupportLineHeight_p,
+                Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y - Height_p / 2 - SupportLineHeight_p);
+
+
         }
 
         //バウンド跡を描画
