@@ -66,12 +66,12 @@ namespace Tennis
 
         private void PlayerPositionMenuItem_Click(object sender, EventArgs e)
         {
-            court.CheckBoundPosition = false;
+            court.SetCheckBoundPosition(false);
         }
 
         private void BoundPositionMenuItem_Click(object sender, EventArgs e)
         {
-            court.CheckBoundPosition = true;
+            court.SetCheckBoundPosition(true);
         }
 
 

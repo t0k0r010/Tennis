@@ -27,7 +27,17 @@ namespace Tennis
 
         public bool IsPlayerA { get;  private set;  }
 
-        public bool CheckBoundPosition { get; set; }
+        public bool CheckBoundPosition { get; private set; }
+
+        public void SetCheckBoundPosition(bool bound)
+        {
+            if (CheckBoundPosition == bound)
+                return;
+
+            CheckBoundPosition = bound;
+            ExcelWriter.Instance.MoveToFistLine();
+        }
+
         public Court(Panel panel)
         {
             this.Panel = panel;
@@ -37,8 +47,6 @@ namespace Tennis
 
             infomation = new Label();
             infomation.Parent = Panel;
-
-
         }
 
         //コートをクリック => バウンド位置を設定
@@ -85,12 +93,12 @@ namespace Tennis
 
                 if(IsPlayerA)
                 {
-                    ExcelWriter.Instance.SetHitterPosition("no time", point_m.X, point_m.Y);
+                    ExcelWriter.Instance.SetRecieverPosition("no time", point_m.X, point_m.Y);
                     ExcelWriter.Instance.MoveToNextLine();  //次のラインへ
                 }
                 else
                 {
-                    ExcelWriter.Instance.SetRecieverPosition("no time", point_m.X, point_m.Y);
+                    ExcelWriter.Instance.SetHitterPosition("no time", point_m.X, point_m.Y);
                 }
 
                 IsPlayerA = !IsPlayerA;

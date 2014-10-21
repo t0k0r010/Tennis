@@ -98,6 +98,10 @@ namespace Tennis
             }
         }
 
+        public void MoveToFistLine()
+        {
+            currentRow = 5;
+        }
         //現在見ている行を次に進める.
         public void MoveToNextLine()
         {
