@@ -231,6 +231,7 @@ namespace Tennis
             //サーブ補助線の描画
            // int SupportLineHeight_p = MeterToPixel(1); //1mをpixelに変換
             
+            //コート下±１ｍの補助線上下
             g.DrawLine(pen,
                 Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y + Height_p / 2 - SupportLineHeight_p,
                  Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y + Height_p / 2 - SupportLineHeight_p);
@@ -239,6 +240,12 @@ namespace Tennis
                 Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y + Height_p / 2 + SupportLineHeight_p,
                 Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y + Height_p / 2 + SupportLineHeight_p);
 
+            //コート下2mの補助線
+            g.DrawLine(pen,
+                Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y + Height_p / 2 + SupportLineHeight_p*2,
+                 Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y + Height_p / 2 + SupportLineHeight_p*2);
+
+            //コート上±１ｍの補助線
             g.DrawLine(pen,
                 Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y - Height_p / 2 + SupportLineHeight_p,
                 Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y - Height_p / 2 + SupportLineHeight_p);
@@ -247,6 +254,32 @@ namespace Tennis
                 Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y - Height_p / 2 - SupportLineHeight_p,
                 Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y - Height_p / 2 - SupportLineHeight_p);
 
+            //コート上2mの補助線
+            g.DrawLine(pen,
+               Center_p.X - Width_p / 2 - SupportLineWidth_p, Center_p.Y - Height_p / 2 - SupportLineHeight_p*2,
+               Center_p.X + Width_p / 2 + SupportLineWidth_p, Center_p.Y - Height_p / 2 - SupportLineHeight_p*2);
+
+            //コート4分の１補助線下左右
+            g.DrawLine(pen,
+                Center_p.X - Width_p / 4, Center_p.Y+ Height_p / 2 - SupportLineHeight_p / 2,
+                Center_p.X - Width_p / 4, Center_p.Y+ Height_p / 2 + SupportLineHeight_p / 2);
+
+            g.DrawLine(pen,
+                Center_p.X + Width_p / 4, Center_p.Y + Height_p / 2 - SupportLineHeight_p / 2,
+                Center_p.X + Width_p / 4, Center_p.Y + Height_p / 2 + SupportLineHeight_p / 2);
+
+            //コート4分の１補助線上左右
+            g.DrawLine(pen,
+                Center_p.X - Width_p / 4, Center_p.Y - Height_p / 2 - SupportLineHeight_p / 2,
+                Center_p.X - Width_p / 4, Center_p.Y - Height_p / 2 + SupportLineHeight_p / 2);
+
+            g.DrawLine(pen,
+                Center_p.X + Width_p / 4, Center_p.Y - Height_p / 2 - SupportLineHeight_p / 2,
+                Center_p.X + Width_p / 4, Center_p.Y - Height_p / 2 + SupportLineHeight_p / 2);
+
+
+
+
             
         }
 
@@ -254,7 +287,7 @@ namespace Tennis
         void DrawBoundMarks(Graphics g)
         {
             Pen pen = new Pen(Color.Red);
-            int markerSize = Width_p / 20;
+            int markerSize = Width_p / 30;
             foreach (Point p in BoundPositions_p)
             {
                 g.DrawEllipse(pen, p.X - markerSize / 2, p.Y - markerSize / 2, markerSize, markerSize);
