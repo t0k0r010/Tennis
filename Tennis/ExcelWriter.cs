@@ -21,7 +21,7 @@ namespace Tennis
        // System.Diagnostics.Process excelProcess = null;
         Excel.Application excelApp;
         Excel.Workbook wb;
-
+        Excel.Worksheet shotDataSheet, rallyDataSheet;
         //現在の行番号
         private uint currentRow = 5;    //これは専用のsetterでしかアクセスしないようにする.   
         public uint CurrentRow { get { return currentRow; } }    //取得専用
@@ -58,6 +58,7 @@ namespace Tennis
                 }
             }
         }
+
         public static bool Available()
         {
             if (Instance == null || Instance.excelApp == null)
@@ -79,6 +80,10 @@ namespace Tennis
             try
             {
                 ((Excel.Worksheet)wb.Sheets[1]).Select();
+                ((Excel.Worksheet)wb.Sheets[1]).Name = "ShotData";
+                ((Excel.Worksheet)wb.Sheets[2]).Name = "RallyData";
+                shotDataSheet = (Excel.Worksheet)wb.Sheets[1];
+                rallyDataSheet = (Excel.Worksheet)wb.Sheets[2];
                 MakeTemplate();
             }
             catch (Exception ex)
@@ -102,6 +107,7 @@ namespace Tennis
         {
             currentRow = 5;
         }
+
         //現在見ている行を次に進める.
         public void MoveToNextLine()
         {
@@ -140,15 +146,17 @@ namespace Tennis
         }
 
         //列のテンプレートを作成
+        // sheet  : エクセルのシート
         // title  : 黄色の文字で書かれるその項目のタイトル.
         // left   : その項目の左端の列番号( "A" や "D" と指定する)
         // right  : 右端の列番号
         // return : 指定した範囲のセルが戻る "A", "D" と指定すると "A1" から"D4"が返る
-        Excel.Range MakeCol(string title, string left, string right)
+        // height : 下線を引く位置を指定する. 何も指定しないと4になる
+        Excel.Range MakeCol(Excel.Worksheet sheet, string title, string left, string right, int height = 4)
         {
             Excel.XlBorderWeight lineWeight = Excel.XlBorderWeight.xlMedium;
 
-            Excel.Range r = excelApp.get_Range(left + "1", right + "4");
+            Excel.Range r = sheet.get_Range(left + "1", right + height.ToString());
             r.get_Range("A1").Value2 = title;
             r.get_Range("A1").Interior.Color = 0x44FFFF;
             r.Borders.get_Item(Excel.XlBordersIndex.xlEdgeRight).Weight = lineWeight;
@@ -166,30 +174,30 @@ namespace Tennis
         void MakeTemplate()
         {
             //時間の列のテンプレート
-            Excel.Range time = MakeCol("時間", "A", "B");
+            Excel.Range time = MakeCol(shotDataSheet,"時間", "A", "B");
             time.get_Range("A2").Value2 = "再生時間";
             time.get_Range("B2").Value2 = "到達時間";
 
             //カウントの列のテンプレート
-            Excel.Range count = MakeCol("カウント", "C", "E");
+            Excel.Range count = MakeCol(shotDataSheet, "カウント", "C", "E");
             count.get_Range("A2").Value2 = "セット";
             count.get_Range("B2").Value2 = "ゲーム";
             count.get_Range("C2").Value2 = "ポイント";
 
             //番号の列
-            Excel.Range number = MakeCol("番号", "F", "G");
+            Excel.Range number = MakeCol(shotDataSheet, "番号", "F", "G");
             number.get_Range("A2").Value2 = "ラリー";
             number.get_Range("B2").Value2 = "ショット";
 
             //種別の列
-            Excel.Range kind = MakeCol("種別", "H", "K");
+            Excel.Range kind = MakeCol(shotDataSheet, "種別", "H", "K");
             kind.get_Range("A2").Value2 = "サーブ";
             kind.get_Range("B2").Value2 = "リターン";
             kind.get_Range("C2").Value2 = "ラリー";
             kind.get_Range("D2").Value2 = "endショット";
 
             //サーブの列
-            Excel.Range serve = MakeCol("サーブ", "L", "AA");
+            Excel.Range serve = MakeCol(shotDataSheet, "サーブ", "L", "AA");
             /*
              サーブの種類の列名を書く
              * ここは自分で書いてみてください.
@@ -198,7 +206,7 @@ namespace Tennis
 
 
             //「座標」項目テンプレートの作成
-            Excel.Range coordinate = MakeCol("座標", "AB", "AJ");//exelApp.get_Range("AB1", "AJ4");
+            Excel.Range coordinate = MakeCol(shotDataSheet, "座標", "AB", "AJ");//exelApp.get_Range("AB1", "AJ4");
             coordinate.get_Range("A2").Value2 = "バウンド";
             coordinate.get_Range("A3").Value2 = "x";
             coordinate.get_Range("B3").Value2 = "y";
@@ -210,8 +218,53 @@ namespace Tennis
             coordinate.get_Range("E2").Value2 = "被打選手";
             coordinate.get_Range("E3").Value2 = "x";
             coordinate.get_Range("F3").Value2 = "y";
+
+            MakeRallySheetTemplate();
         }
 
+        void MakeRallySheetTemplate()
+        {
+            MakeCol(rallyDataSheet, "選手", "A", "A", 3);
+            rallyDataSheet.get_Range("A2").Value2 = "PlayerA";
+            rallyDataSheet.get_Range("A3").Value2 = "PlayerB";
+
+            MakeCol(rallyDataSheet, "項目", "B", "B", 3);
+
+            Excel.Range side = MakeCol(rallyDataSheet, "サイド", "C", "D", 3);
+
+            //get_Rangeでシートの一部分をとってくる. //左上, 右下のセルを指定
+            side.get_Range("A3", "A3").Value2 = "フォア";
+
+            side.get_Range("B3", "B3").Value2 = "バック";
+
+            //サーブ権
+            Excel.Range server = MakeCol(rallyDataSheet, "サーブ権", "E", "F", 3);
+            server.get_Range("A3", "A3").Value2 = "=A2";
+            server.get_Range("B3", "B3").Value2 = "=A3";
+
+            //ポイント
+            Excel.Range point = MakeCol(rallyDataSheet, "ポイント", "G", "H", 3);
+            point.get_Range("A3", "A3").Value2 = "=A2";
+            point.get_Range("B3", "B3").Value2 = "=A3";
+
+            //サーブ
+            Excel.Range serve = MakeCol(rallyDataSheet, "サーブ", "I", "J", 3);
+            serve.get_Range("A3", "A3").Value2 = "1st";
+            serve.get_Range("B3", "B3").Value2 = "2nd";
+            
+            //サーブバウンド座標
+            Excel.Range serveBound = MakeCol(rallyDataSheet, "サーブバウンド座標", "K", "N", 3);
+            serveBound.get_Range("A2", "A2").Value2 = "=A2";
+            serveBound.get_Range("A3", "A3").Value2 = "x";
+            serveBound.get_Range("B3", "B3").Value2 = "y";
+            serveBound.get_Range("C2", "C2").Value2 = "=A3";
+            serveBound.get_Range("C3", "C3").Value2 = "x";
+            serveBound.get_Range("D3", "D3").Value2 = "y";
+            // D4(左上)に書き込みたいときは A1を指定する
+            //Value2に書き込む
+            
+
+        }
 
         /*
         void SetupProcess()
