@@ -15,13 +15,12 @@ namespace Tennis
     public partial class Form1 : Form
     {
         Court court;
-        MediaPlayer mediaPlayer;
+
         //両方とも開いているか
         public static bool IsStarted { 
             get 
             {
-                return ExcelWriter.Available() /*&& MediaPlayer.Available()*/; 
-
+                return ExcelWriter.Available(); 
             } 
         }
 
@@ -30,17 +29,40 @@ namespace Tennis
             //初期設定を書く
             InitializeComponent();
 
-
             court       = new Court(this.CourtPannel);
-          //  mediaPlayer = new MediaPlayer(WMPlayer);
 
+            this.CourtPannel.MouseClick += ClickCourt;
             this.KeyDown += Form1_KeyDown;
-            this.Resize += Form1_Resize;
+            this.Resize  += Form1_Resize;
         }
 
         void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             
+        }
+
+        void ClickCourt(object sender, MouseEventArgs e)
+        {
+            if (!Form1.IsStarted)
+                return;
+
+            ExcelWriter writer = ExcelWriter.Instance;
+            Point p = new Point(e.X, e.Y);
+            if( e.Button == MouseButtons.Left )
+            {
+                Color c = writer.shotSheet.Surveying == ExcelWriter.ShotDataSheet.Surveyed.BoundPos ? 
+                    Court.BoundColor : (writer.shotSheet.IsHitter ? Court.HitterColor : Court.RecieverColor);
+
+                court.AddPosition(p, c);    //コートに新しい位置を追加
+                PointF realPos = court.ToRealUnit(p);
+                writer.shotSheet.SetPosition("", realPos);
+            }
+            else if(e.Button == MouseButtons.Right)
+            {
+                court.ClearPosition();                  //コートに書いている位置を削除
+                writer.shotSheet.EndRally(); //エクセルにラインを書き込む
+            }
+            CourtPannel.Invalidate(); //再描画命令
         }
 
         void Form1_Resize(object sender, EventArgs e)
@@ -65,14 +87,24 @@ namespace Tennis
 
         }
 
+        //プレイヤー位置をクリックしていく
         private void PlayerPositionMenuItem_Click(object sender, EventArgs e)
         {
-            court.SetCheckBoundPosition(false);
+            if (!ExcelWriter.Available())
+                return;
+
+            ExcelWriter.Instance.shotSheet.Surveying = ExcelWriter.ShotDataSheet.Surveyed.PlayerPos;
+            court.ClearPosition();
         }
 
+        //バウンド位置をクリックしていく
         private void BoundPositionMenuItem_Click(object sender, EventArgs e)
         {
-            court.SetCheckBoundPosition(true);
+            if (!ExcelWriter.Available())
+                return;
+
+            ExcelWriter.Instance.shotSheet.Surveying = ExcelWriter.ShotDataSheet.Surveyed.BoundPos;
+            court.ClearPosition();
         }
 
     }

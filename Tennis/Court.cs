@@ -5,117 +5,81 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
-//using System.Math;
+using System.Windows;
+
 namespace Tennis
 {
     class Court
     {
-        const float Width_m = 10.97f;    //現実のコートのサイズ[m]
-        const float Height_m = 23.77f;
-        const float SingleCourtWidth_m = 8.23f;   //シングルコートの幅
-        const float ServiceLineHeight_m = 6.4f;  //ネットからサービスラインまでの長さ
+        public static readonly Color BoundColor = Color.Green;
+        public static readonly Color HitterColor = Color.Red;
+        public static readonly Color RecieverColor = Color.Blue;
+        public const float Width_m = 10.97f;    //現実のコートのサイズ[m]
+        public const float Height_m = 23.77f;
+        public const float SingleCourtWidth_m = 8.23f;   //シングルコートの幅
+        public const float ServiceLineHeight_m = 6.4f;  //ネットからサービスラインまでの長さ
 
         int Width_p { get; set; }       //画面上のコートのサイズ [pixel]
         int Height_p { get; set; }
         Point Center_p { get; set; }    //コートの中心位置 [pixel]
 
-        List<Point> BoundPositions_p = new List<Point>();
-
+        public Dictionary<Color, List<Point>> Positions_p{get; private set;}
         Panel Panel;
 
         Label infomation;
 
-        public bool IsPlayerA { get;  private set;  }
-
-        public bool CheckBoundPosition { get; private set; }
-
-        public void SetCheckBoundPosition(bool bound)
-        {
-            if (CheckBoundPosition == bound)
-                return;
-
-            CheckBoundPosition = bound;
-            ExcelWriter.Instance.MoveToFistLine();
-        }
-
         public Court(Panel panel)
         {
+            Positions_p = new Dictionary<Color, List<Point>>();
+            Positions_p.Add(BoundColor, new List<Point>());
+            Positions_p.Add(HitterColor, new List<Point>());
+            Positions_p.Add(RecieverColor, new List<Point>());
+
             this.Panel = panel;
             panel.Paint += new System.Windows.Forms.PaintEventHandler(Draw);
-            panel.MouseClick += MouseClick;
             SetCourtSize(panel);
 
             infomation = new Label();
             infomation.Parent = Panel;
         }
 
-        //コートをクリック => バウンド位置を設定
-        void MouseClick(object sender, MouseEventArgs e)
+        
+        public ShotInfo GetLastShotInfo()
         {
-            if (!Form1.IsStarted)
-                return;
+            //ラリーが始まっていない場合は,情報がとれない
+            if (!(Positions_p.ContainsKey(HitterColor) && Positions_p.ContainsKey(RecieverColor)))
+                return null;
 
-            if (CheckBoundPosition)
-                ClickedBoundPosition(sender, e);
-            else
-                ClickedPlayerPosition(sender, e);
-            Panel.Invalidate(); //再描画命令
+            if( Positions_p[HitterColor].Count == 0 || Positions_p[RecieverColor].Count == 0)
+                return null;
+
+            ShotInfo s = new ShotInfo();
+            var hitter   = Positions_p[HitterColor];
+            var reciever = Positions_p[RecieverColor];
+            s.Hitter   = ToRealUnit( hitter[hitter.Count - 1] );
+            s.Reciever = ToRealUnit(reciever[reciever.Count - 1]);
+
+            return s;
         }
 
-        void ChangeIndicator()
+        //新しくクリックした位置を追加
+        public void AddPosition(Point _p, Color c)
         {
-            infomation.Text = IsPlayerA ? "PlayerA" : "PlayerB";
+            if( !Positions_p.ContainsKey(c))
+                Positions_p.Add(c, new List<Point>());
+
+            Positions_p[c].Add(_p);
+            
+            Panel.Invalidate();
         }
 
-        //バウンド地点を書き出す
-        void ClickedBoundPosition(object sender, MouseEventArgs e)
+        //クリックした位置の削除
+        public void ClearPosition()
         {
-            if (e.Button == MouseButtons.Left)
-            {
-                BoundPositions_p.Add(new Point(e.X, e.Y));
-                PointF point_m = ToRealUnit(e.X, e.Y);
+            foreach(var points in Positions_p.Values)
+                points.Clear();
 
-                ExcelWriter.Instance.SetBoundPosition("no time", point_m.X, point_m.Y);
-                ExcelWriter.Instance.MoveToNextLine();  //次のラインへ
-            }
-            else
-            {
-                ExcelWriter.Instance.WriteLine();
-                BoundPositions_p.Clear();
-            }
-        }
-
-        void ClickedPlayerPosition(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                BoundPositions_p.Add(new Point(e.X, e.Y));
-                PointF point_m = ToRealUnit(e.X, e.Y);
-
-                if(IsPlayerA)
-                {
-                    ExcelWriter.Instance.SetRecieverPosition("no time", point_m.X, point_m.Y);
-                    ExcelWriter.Instance.MoveToNextLine();  //次のラインへ
-                }
-                else
-                {
-                    ExcelWriter.Instance.SetHitterPosition("no time", point_m.X, point_m.Y);
-                }
-
-                IsPlayerA = !IsPlayerA;
-            }
-            else
-            {
-                ExcelWriter.Instance.WriteLine();
-                BoundPositions_p.Clear();
-            }
-        }
-
-        void Draw(Object panel, PaintEventArgs e)
-        {
-            SetCourtSize((Panel)panel);    //サイズ変わった時の為に毎回セットする.
-            DrawCourt(e.Graphics);
-            DrawBoundMarks(e.Graphics);
+            Panel.Invalidate();
         }
 
         //コートのサイズを再計算
@@ -157,6 +121,7 @@ namespace Tennis
 
             return new PointF(x, y);
         }
+
         //コートの中心を原点とした,実世界の[m]単位に変換
         public PointF ToRealUnit(int p_x, int p_y)
         {
@@ -165,6 +130,15 @@ namespace Tennis
 
             return new PointF(x, y);
         }
+
+        //描画
+        void Draw(Object panel, PaintEventArgs e)
+        {
+            SetCourtSize((Panel)panel);    //サイズ変わった時の為に毎回セットする.
+            DrawCourt(e.Graphics);
+            DrawMarks(e.Graphics);
+        }
+
         //コートの描画
         void DrawCourt(Graphics g)
         {
@@ -284,37 +258,80 @@ namespace Tennis
         }
 
         //バウンド跡を描画
-        void DrawBoundMarks(Graphics g)
+        void DrawMarks(Graphics g)
         {
-            Pen pen = new Pen(Color.Red);
             int markerSize = Width_p / 30;
-            foreach (Point p in BoundPositions_p)
+
+            foreach( var p in Positions_p)
             {
-                g.DrawEllipse(pen, p.X - markerSize / 2, p.Y - markerSize / 2, markerSize, markerSize);
+                Pen pen = new Pen(p.Key);
+                SolidBrush brush = new SolidBrush(p.Key);
+                foreach(var point in p.Value)
+                    g.FillEllipse(brush, point.X - markerSize / 2, point.Y - markerSize / 2, markerSize, markerSize);
+            }
+
+            var hitMark = Positions_p[HitterColor];
+
+            if (hitMark.Count > 1)            
+                g.DrawLines(new Pen(HitterColor), hitMark.ToArray());
+
+            if (hitMark.Count > 2)
+            {
+                Font f = new Font("Arial", 12);
+                SolidBrush brush = new SolidBrush(Color.Black);
+                for (int i = 1; i < hitMark.Count - 1; i++)
+                {
+                    var a = hitMark[i - 1];
+                    var b = hitMark[i];
+                    var c = hitMark[i + 1];
+
+                    float deg = GetDegree(new PointF(a.X - b.X, a.Y - b.Y), new PointF(c.X - b.X, c.Y - b.Y));
+
+                    g.DrawString(deg.ToString() + "°", f, brush, b);
+                }
+            }
+            
+        }
+
+        float GetDegree(PointF vec1, PointF vec2)
+        {
+            double dot = vec1.X * vec2.X + vec1.Y * vec2.Y;
+            double absA = Math.Sqrt(vec1.X * vec1.X + vec1.Y * vec1.Y);
+            double absB = Math.Sqrt(vec2.X * vec2.X + vec2.Y * vec2.Y);
+
+            double rad = Math.Acos(dot / absA / absB);
+
+            return (float)(rad * 180 / Math.PI);
+            
+        }
+        void DrawMarks(Graphics g, List<Point> marks, SolidBrush brush)
+        {
+            int markerSize = Width_p / 30;
+            foreach (var point in marks)
+                g.FillEllipse(brush, point.X - markerSize / 2, point.Y - markerSize / 2, markerSize, markerSize);
+        }
+
+        //一回のショットの情報
+        public class ShotInfo
+        {
+            public const float BigNum = -10000;
+            //打者,被打者,バウンド位置
+            public PointF Hitter = new PointF(BigNum, BigNum);
+            public PointF Reciever = new PointF(BigNum, BigNum);
+            public PointF Bound = new PointF(BigNum, BigNum);
+
+            public bool Available()
+            {
+                return (Hitter.X > BigNum + 1) && (Reciever.X > BigNum + 1);
             }
         }
+
+        public class ServeInfo
+        {
+            public PointF HitterPos, RecieverPos;
+            public PointF Direction;
+        }
+
         
-
-        /*
-private void ClickCourt(object sender, MouseEventArgs e)
-{
-    //左クリックで新しくバウンド位置を追加
-    if (e.Button == MouseButtons.Left)
-    {
-        cursor = new Point(e.X, e.Y);
-        cursorPosition.Text = "(" + e.X + "," + e.Y + ")";
-
-        cursorText.Text = e.X + "," + e.Y;
-
-        BoundPositions.Add(cursor);
-    }
-        //右クリックでバウンドの軌跡を消去
-    else if (e.Button == MouseButtons.Right)
-    {
-        Output();
-        BoundPositions.Clear();
-    }
-    CourtPannel.Invalidate(); //再描画しろっていう命令
-}*/
     }
 }
