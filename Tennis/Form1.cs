@@ -15,7 +15,6 @@ namespace Tennis
     public partial class Form1 : Form
     {
         Court court;
-
         //両方とも開いているか
         public static bool IsStarted { 
             get 
@@ -26,6 +25,7 @@ namespace Tennis
 
         public Form1()
         {
+            
             //初期設定を書く
             InitializeComponent();
 

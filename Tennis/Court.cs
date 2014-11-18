@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
-using System.Windows;
 
 namespace Tennis
 {
@@ -24,6 +23,12 @@ namespace Tennis
         Point Center_p { get; set; }    //コートの中心位置 [pixel]
 
         public Dictionary<Color, List<Point>> Positions_p{get; private set;}
+
+        //1ラリーにおけるショットの方向を表す.
+        //偶数番目 : サーバのショット
+        //奇数番目 : レシーバのショット
+        public List<System.Windows.Vector> ShotDirectionsInRally{get; private set;}
+
         Panel Panel;
 
         Label infomation;
@@ -34,6 +39,8 @@ namespace Tennis
             Positions_p.Add(BoundColor, new List<Point>());
             Positions_p.Add(HitterColor, new List<Point>());
             Positions_p.Add(RecieverColor, new List<Point>());
+
+            ShotDirectionsInRally = new List<System.Windows.Vector>();
 
             this.Panel = panel;
             panel.Paint += new System.Windows.Forms.PaintEventHandler(Draw);
@@ -63,15 +70,34 @@ namespace Tennis
         }
 
         //新しくクリックした位置を追加
-        public void AddPosition(Point _p, Color c)
+        public void AddPosition(Point p, Color c)
         {
             if( !Positions_p.ContainsKey(c))
                 Positions_p.Add(c, new List<Point>());
 
-            Positions_p[c].Add(_p);
-            
+            Positions_p[c].Add(p);
+
+            //打点の場合
+            if (c == HitterColor && Positions_p[HitterColor].Count > 1)
+            {
+                var hitter = Positions_p[HitterColor];
+                System.Windows.Vector direction = ToVector(hitter[hitter.Count - 2]) - ToVector(hitter[hitter.Count - 1]);
+
+                ShotDirectionsInRally.Add(direction);
+            }
+
             Panel.Invalidate();
         }
+
+        public static System.Windows.Vector ToVector(Point p)
+        {
+            return new System.Windows.Vector(p.X, p.Y);
+        }
+
+        public static System.Windows.Vector ToVector(PointF p)
+        {
+            return new System.Windows.Vector(p.X, p.Y);
+        } 
 
         //クリックした位置の削除
         public void ClearPosition()
@@ -79,6 +105,7 @@ namespace Tennis
             foreach(var points in Positions_p.Values)
                 points.Clear();
 
+            ShotDirectionsInRally.Clear();
             Panel.Invalidate();
         }
 
@@ -108,7 +135,7 @@ namespace Tennis
         }
 
         // [pixel] -> [m] 変換
-        public float PixelToMeter(int pixel)
+        public float PixelToMeter(float pixel)
         {
             return pixel * Width_m / Width_p;
         }
@@ -279,36 +306,34 @@ namespace Tennis
             {
                 Font f = new Font("Arial", 12);
                 SolidBrush brush = new SolidBrush(Color.Black);
+
+                //角度を表示
                 for (int i = 1; i < hitMark.Count - 1; i++)
                 {
-                    var a = hitMark[i - 1];
-                    var b = hitMark[i];
-                    var c = hitMark[i + 1];
+                    var vec1 = -ShotDirectionsInRally[i - 1];
+                    var vec2 =  ShotDirectionsInRally[i];
+ 
+                    //ショットの角度を計算
+                    var deg = Math.Abs(ToRoundDown( System.Windows.Vector.AngleBetween(vec1, vec2), 2));
 
-                    float deg = GetDegree(new PointF(a.X - b.X, a.Y - b.Y), new PointF(c.X - b.X, c.Y - b.Y));
 
-                    g.DrawString(deg.ToString() + "°", f, brush, b);
+                    g.DrawString(deg.ToString() + "°", f, brush, hitMark[i]);
+                }
+
+                //横に面積を表示
+                for (int i = 2; i < hitMark.Count; i++)
+                {
+                    var a = ToVector(hitMark[i-2]);
+                    var b = ToVector(hitMark[i-1]);
+                    var c = ToVector(hitMark[i]);
+
+                    var p = (a + b + c) / 3;
+
+                    var area = Math.Abs(System.Windows.Vector.CrossProduct(a - b, c - b) / 2);
+                    area = ToRoundDown( PixelToMeter( PixelToMeter((float)area)), 2);
+                    g.DrawString(area.ToString(), f, brush, new PointF(0, i * 15));
                 }
             }
-            
-        }
-
-        float GetDegree(PointF vec1, PointF vec2)
-        {
-            double dot = vec1.X * vec2.X + vec1.Y * vec2.Y;
-            double absA = Math.Sqrt(vec1.X * vec1.X + vec1.Y * vec1.Y);
-            double absB = Math.Sqrt(vec2.X * vec2.X + vec2.Y * vec2.Y);
-
-            double rad = Math.Acos(dot / absA / absB);
-
-            return (float)(rad * 180 / Math.PI);
-            
-        }
-        void DrawMarks(Graphics g, List<Point> marks, SolidBrush brush)
-        {
-            int markerSize = Width_p / 30;
-            foreach (var point in marks)
-                g.FillEllipse(brush, point.X - markerSize / 2, point.Y - markerSize / 2, markerSize, markerSize);
         }
 
         //一回のショットの情報
@@ -326,12 +351,12 @@ namespace Tennis
             }
         }
 
-        public class ServeInfo
+        public static double ToRoundDown(double dValue, int iDigits)
         {
-            public PointF HitterPos, RecieverPos;
-            public PointF Direction;
-        }
+            double dCoef = System.Math.Pow(10, iDigits);
 
-        
+            return dValue > 0 ? System.Math.Floor(dValue * dCoef) / dCoef :
+                                System.Math.Ceiling(dValue * dCoef) / dCoef;
+        }
     }
 }
