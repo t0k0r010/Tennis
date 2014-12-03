@@ -50,16 +50,12 @@ namespace Tennis
             Point p = new Point(e.X, e.Y);
             if( e.Button == MouseButtons.Left )
             {
-                Color c = writer.shotSheet.Surveying == ExcelWriter.ShotDataSheet.Surveyed.BoundPos ? 
-                    Court.BoundColor : (writer.shotSheet.IsHitter ? Court.HitterColor : Court.RecieverColor);
-
-                court.AddPosition(p, c);    //コートに新しい位置を追加
-                PointF realPos = court.ToRealUnit(p);
-                writer.shotSheet.SetPosition("", realPos);
+                court.AddPosition(p);                                    //コートに新しい位置を追加
+                writer.shotSheet.SetPosition("", court.ToRealUnit(p));
             }
             else if(e.Button == MouseButtons.Right)
             {
-                court.ClearPosition();                  //コートに書いている位置を削除
+                court.ClearPosition();       //コートに書いている位置を削除
                 writer.shotSheet.EndRally(); //エクセルにラインを書き込む
             }
             CourtPannel.Invalidate(); //再描画命令
@@ -94,7 +90,7 @@ namespace Tennis
                 return;
 
             ExcelWriter.Instance.shotSheet.Surveying = ExcelWriter.ShotDataSheet.Surveyed.PlayerPos;
-            court.ClearPosition();
+            court.ChangeSurveyed(Court.Surveyed.HitterPos);
         }
 
         //バウンド位置をクリックしていく
@@ -104,7 +100,12 @@ namespace Tennis
                 return;
 
             ExcelWriter.Instance.shotSheet.Surveying = ExcelWriter.ShotDataSheet.Surveyed.BoundPos;
-            court.ClearPosition();
+            court.ChangeSurveyed(Court.Surveyed.BoundPos);
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            
         }
 
     }

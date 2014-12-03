@@ -18,7 +18,6 @@ namespace Tennis
     using Excel = Microsoft.Office.Interop.Excel;
     class ExcelWriter
     {
-        static ExcelWriter instance = null;
         public static ExcelWriter Instance
         {
             get;
@@ -28,18 +27,52 @@ namespace Tennis
         Excel.Application app;
         Excel.Workbook wb;
 
+        public class DatasSheet : DataSheet
+        {
+
+            public DatasSheet(Excel.Worksheet sheet, int labelRowHeight)
+                :base(sheet, labelRowHeight)
+            {
+
+            }
+        }
+
         public class RallyDataSheet : DataSheet
         {
             public bool IsHitter { get; private set; }
+
+            DataLabel AttackAngleMe;    //自分に対する攻撃角度
+            DataLabel AttackAngleOther; //相手に対する攻撃角度
+
             public RallyDataSheet(Excel.Worksheet sheet, int labelRowHeight)
                 : base(sheet, labelRowHeight)
             {
                 IsHitter = false;
+
+                AttackAngleOther = new DataLabel("AS", "BB", LabelRowHeight);
+                AttackAngleMe = new DataLabel("BC", "BL", +LabelRowHeight);
             }
 
             public override void SetPosition(string time, PointF point)
             {
             }
+
+            public void Update()
+            {
+                Court court  = Court.Instance;
+                int rallyNum = court.RallyNum;
+
+                var shots = court.ShotDirectionsInRally;
+
+                //ラリーが2回未満なら角度が出せない
+                if (shots.Count < 2)
+                    return;
+
+                //2つのベクトルの角度を求める
+                var angleOther = System.Windows.Vector.AngleBetween(shots[shots.Count - 1], shots[shots.Count - 2]);
+                var rangeOther = AttackAngleOther.GetRange(Sheet);
+            }
+
         };
 
         public class ShotDataSheet : DataSheet
@@ -50,6 +83,7 @@ namespace Tennis
                 BoundPos,   //バウンド位置
                 PlayerPos   //プレイヤー位置
             };
+
             public Surveyed Surveying { get; set; }
             public bool IsHitter { get; private set; }
 
@@ -61,17 +95,28 @@ namespace Tennis
                 : base(sheet, labelRowHeight)
             {
                 IsHitter = true;
-                PlayerPos   = new DataLabel("AD", "AG", LabelRowHeight+1);
-                BoundPos    = new DataLabel("AB", "AC", LabelRowHeight+1);
+                PlayerPos   = new DataLabel("AA", "AD", LabelRowHeight+1);
+                BoundPos    = new DataLabel( "Q",  "R", LabelRowHeight+1);
                 AttackAngle = new DataLabel("AL", "AL", LabelRowHeight + 1);
             }
 
             public override void SetPosition(string time, PointF point)
             {
-                if (Surveying == Surveyed.BoundPos)
-                    SetBoundPosition(time, point);
-                else
-                    SetPlayerPosition(time, point);
+                var court = Court.Instance;
+                switch(court.LastSurveyed)
+                {
+                    case Court.Surveyed.BoundPos:
+                        base.SetPosition(BoundPos.GetRange(Sheet), time, point);
+                        BoundPos.Row++;
+                        break;
+                    case Court.Surveyed.HitterPos:
+                        base.SetPosition(PlayerPos.GetRange(Sheet).get_Range("A1", "B1"), time, point);
+                        break;
+                    case Court.Surveyed.RecieverPos:
+                        base.SetPosition(PlayerPos.GetRange(Sheet).get_Range("C1", "D1"), time, point);
+                        PlayerPos.Row++;
+                        break;
+                }
             }
 
             //ラリーの終わりの表す線を書き込む
@@ -86,7 +131,7 @@ namespace Tennis
 
             void SetBoundPosition(string time, PointF p)
             {
-                SetPosition(Sheet.get_Range(BoundPos.LeftCol + BoundPos.Row, BoundPos.RightCol + BoundPos.Row), time, p);
+                base.SetPosition(Sheet.get_Range(BoundPos.LeftCol + BoundPos.Row, BoundPos.RightCol + BoundPos.Row), time, p);
                 BoundPos.Row++;
             }
 
@@ -95,8 +140,7 @@ namespace Tennis
                 Excel.Range r = Sheet.get_Range(PlayerPos.LeftCol + PlayerPos.Row, PlayerPos.RightCol + PlayerPos.Row);
 
                 Excel.Range range = IsHitter ? r.get_Range("A1" , "B1") : r.get_Range("C1" , "D1");
-                SetPosition(range, time, p);
-
+                base.SetPosition(range, time, p);
                 IsHitter = !IsHitter;
 
                 if (!IsHitter){
@@ -141,10 +185,10 @@ namespace Tennis
             }
         };
 
+
         public ShotDataSheet shotSheet { get; private set; }
-
         public RallyDataSheet rallySheet { get; private set; }
-
+        public DatasSheet datasSheet { get; private set; }
         //ファイルを開く
         public static void Open()
         {
@@ -201,8 +245,9 @@ namespace Tennis
             {
                 CopyTemplate(app, wb);  //新しく作る場合
 
-                rallySheet = new RallyDataSheet(wb.Sheets[2], 3);
-                shotSheet = new ShotDataSheet(wb.Sheets[1], 4);
+                shotSheet  = new ShotDataSheet(wb.Sheets[1], 4);
+                datasSheet = new DatasSheet(wb.Sheets[2], 4);
+                rallySheet = new RallyDataSheet(wb.Sheets[3], 3);
             }
             catch (Exception ex)
             {
