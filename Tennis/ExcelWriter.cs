@@ -93,8 +93,9 @@ namespace Tennis
                         MinAng[k] = deg;
                 }
                 //書き出し
-                double serverCnt   = Math.Ceiling( court.ShotAngleForOther.Count / 2.0);
-                double recieverCnt = Math.Floor(court.ShotAngleForOther.Count / 2.0);
+                var cnt = court.ShotAngleForOther.Count;
+                double serverCnt   =  cnt % 2 == 0 ? cnt/2 : (cnt+1)/2;
+                double recieverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt - 1) / 2;
                 Excel.Range r = AttackAngleOther.GetRange(Sheet);
                 r.get_Range("A1").Value2 = SumAng[Aindex];   //合計
                 r.get_Range("B1").Value2 = SumAng[Bindex];
@@ -125,8 +126,9 @@ namespace Tennis
                         MinAng[k] = deg;
                 }
 
-                serverCnt = Math.Ceiling(court.ShotAngleForMe.Count / 2.0);
-                recieverCnt = Math.Floor(court.ShotAngleForMe.Count / 2.0);
+                cnt = court.ShotAngleForMe.Count;
+                serverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt + 1) / 2;
+                recieverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt - 1) / 2;
                 r = AttackAngleMe.GetRange(Sheet);
                 r.get_Range("A1").Value2 = SumAng[Aindex];   //合計
                 r.get_Range("B1").Value2 = SumAng[Bindex];
