@@ -55,8 +55,15 @@ namespace Tennis
             }
             else if(e.Button == MouseButtons.Right)
             {
-                court.ClearPosition();       //コートに書いている位置を削除
-                writer.shotSheet.EndRally(); //エクセルにラインを書き込む
+                if(court.LastSurveyed != Court.Surveyed.BoundPos && 
+                    court.Positions_p[Court.Surveyed.HitterPos].Count != court.Positions_p[Court.Surveyed.RecieverPos].Count)
+                {
+                    MessageBox.Show("被打選手の位置をクリックしてください", "注意");
+                    return;
+                }
+                writer.rallySheet.EndRally();
+                writer.shotSheet.EndRally();    //エクセルにラインを書き込む
+                court.ClearPosition();          //コートに書いている位置を削除
             }
             CourtPannel.Invalidate(); //再描画命令
         }
@@ -64,6 +71,10 @@ namespace Tennis
         void Form1_Resize(object sender, EventArgs e)
         {
             CourtPannel.Invalidate();
+            int padding = 30;
+            TopPlayerName.Location = new Point((InputPanel.Width - TopPlayerName.Width) / 2, padding);
+            BottomPlayerName.Location = new Point( (InputPanel.Width - BottomPlayerName.Width) / 2, InputPanel.Height - BottomPlayerName.Height - padding);
+            ChangeCourtButton.Location = new Point((InputPanel.Width - ChangeCourtButton.Width) / 2, (InputPanel.Height - ChangeCourtButton.Height) / 2);
         }
 
         //エクセルを開く
@@ -76,11 +87,6 @@ namespace Tennis
         private void dougaPlayerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MediaPlayer.Instance.Open();
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
 
         //プレイヤー位置をクリックしていく
@@ -106,6 +112,23 @@ namespace Tennis
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             
+        }
+
+        private void ChangeCourtButton_Click(object sender, EventArgs e)
+        {
+            //コートを入れ替え
+            if(court.UpperPlayer == Court.Players.PlayerA)
+            {
+                court.UpperPlayer = Court.Players.PlayerB;
+                TopPlayerName.Text = "Player B";
+                BottomPlayerName.Text = "Player A";
+            }
+            else
+            {
+                court.UpperPlayer = Court.Players.PlayerA;
+                TopPlayerName.Text = "Player A";
+                BottomPlayerName.Text = "Player B";
+            }
         }
 
     }

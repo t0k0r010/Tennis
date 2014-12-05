@@ -37,7 +37,12 @@
             this.CourtPannel = new System.Windows.Forms.Panel();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
             this.SurveyedObject = new System.Windows.Forms.ComboBox();
+            this.TopPlayerName = new System.Windows.Forms.Label();
+            this.InputPanel = new System.Windows.Forms.Panel();
+            this.BottomPlayerName = new System.Windows.Forms.Label();
+            this.ChangeCourtButton = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
+            this.InputPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -49,7 +54,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(556, 26);
+            this.menuStrip1.Size = new System.Drawing.Size(558, 26);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -79,14 +84,14 @@
             // PlayerPositionMenuItem
             // 
             this.PlayerPositionMenuItem.Name = "PlayerPositionMenuItem";
-            this.PlayerPositionMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.PlayerPositionMenuItem.Size = new System.Drawing.Size(148, 22);
             this.PlayerPositionMenuItem.Text = "選手位置";
             this.PlayerPositionMenuItem.Click += new System.EventHandler(this.PlayerPositionMenuItem_Click);
             // 
             // BoundPositionMenuItem
             // 
             this.BoundPositionMenuItem.Name = "BoundPositionMenuItem";
-            this.BoundPositionMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.BoundPositionMenuItem.Size = new System.Drawing.Size(148, 22);
             this.BoundPositionMenuItem.Text = "バウンド位置";
             this.BoundPositionMenuItem.Click += new System.EventHandler(this.BoundPositionMenuItem_Click);
             // 
@@ -100,7 +105,7 @@
             this.CourtPannel.Location = new System.Drawing.Point(11, 28);
             this.CourtPannel.Margin = new System.Windows.Forms.Padding(2);
             this.CourtPannel.Name = "CourtPannel";
-            this.CourtPannel.Size = new System.Drawing.Size(534, 912);
+            this.CourtPannel.Size = new System.Drawing.Size(428, 582);
             this.CourtPannel.TabIndex = 3;
             // 
             // openFileDialog2
@@ -120,18 +125,62 @@
             this.SurveyedObject.Text = "クリック対象";
             this.SurveyedObject.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
+            // TopPlayerName
+            // 
+            this.TopPlayerName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.TopPlayerName.AutoSize = true;
+            this.TopPlayerName.Location = new System.Drawing.Point(26, 24);
+            this.TopPlayerName.Name = "TopPlayerName";
+            this.TopPlayerName.Size = new System.Drawing.Size(49, 12);
+            this.TopPlayerName.TabIndex = 5;
+            this.TopPlayerName.Text = "Player A";
+            // 
+            // InputPanel
+            // 
+            this.InputPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.InputPanel.Controls.Add(this.BottomPlayerName);
+            this.InputPanel.Controls.Add(this.ChangeCourtButton);
+            this.InputPanel.Controls.Add(this.TopPlayerName);
+            this.InputPanel.Location = new System.Drawing.Point(452, 28);
+            this.InputPanel.Name = "InputPanel";
+            this.InputPanel.Size = new System.Drawing.Size(106, 582);
+            this.InputPanel.TabIndex = 8;
+            // 
+            // BottomPlayerName
+            // 
+            this.BottomPlayerName.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.BottomPlayerName.AutoSize = true;
+            this.BottomPlayerName.Location = new System.Drawing.Point(26, 544);
+            this.BottomPlayerName.Name = "BottomPlayerName";
+            this.BottomPlayerName.Size = new System.Drawing.Size(49, 12);
+            this.BottomPlayerName.TabIndex = 6;
+            this.BottomPlayerName.Text = "Player B";
+            // 
+            // ChangeCourtButton
+            // 
+            this.ChangeCourtButton.Location = new System.Drawing.Point(6, 278);
+            this.ChangeCourtButton.Name = "ChangeCourtButton";
+            this.ChangeCourtButton.Size = new System.Drawing.Size(92, 34);
+            this.ChangeCourtButton.TabIndex = 7;
+            this.ChangeCourtButton.Text = "ChangeCourt";
+            this.ChangeCourtButton.UseVisualStyleBackColor = true;
+            this.ChangeCourtButton.Click += new System.EventHandler(this.ChangeCourtButton_Click);
+            // 
             // Form1
             // 
-            this.ClientSize = new System.Drawing.Size(556, 944);
+            this.ClientSize = new System.Drawing.Size(558, 614);
+            this.Controls.Add(this.InputPanel);
             this.Controls.Add(this.SurveyedObject);
             this.Controls.Add(this.CourtPannel);
             this.Controls.Add(this.menuStrip1);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.InputPanel.ResumeLayout(false);
+            this.InputPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -149,6 +198,10 @@
         private System.Windows.Forms.ToolStripMenuItem PlayerPositionMenuItem;
         private System.Windows.Forms.ToolStripMenuItem BoundPositionMenuItem;
         private System.Windows.Forms.ComboBox SurveyedObject;
+        private System.Windows.Forms.Label TopPlayerName;
+        private System.Windows.Forms.Button ChangeCourtButton;
+        private System.Windows.Forms.Panel InputPanel;
+        private System.Windows.Forms.Label BottomPlayerName;
     }
 }
 

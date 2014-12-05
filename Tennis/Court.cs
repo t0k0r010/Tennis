@@ -21,6 +21,18 @@ namespace Tennis
 
         public static Court Instance = null;
 
+        public enum Players
+        {
+            PlayerA,
+            PlayerB
+        }
+
+        //コートの上側にいるプレイヤー
+        public Players UpperPlayer{ get; set;}
+        public Players LowerPlayer { get {
+            return UpperPlayer == Players.PlayerA ? Players.PlayerB : Players.PlayerA; 
+        } 
+        }
         //次にクリックする位置はどの座標のことを指すかの候補
         public enum Surveyed
         {
@@ -57,7 +69,7 @@ namespace Tennis
                 if (CheckingBoundPos)
                     return Surveyed.BoundPos;
 
-                if (LastSurveyed == Surveyed.RecieverPos)
+                if (LastSurveyed == Surveyed.RecieverPos || LastSurveyed == Surveyed.None)
                     return Surveyed.HitterPos;
                 else
                     return Surveyed.RecieverPos;
@@ -74,10 +86,20 @@ namespace Tennis
         public Dictionary<Surveyed, List<Point>> Positions_p { get; private set; }
         public Dictionary<Surveyed, Color> MarkColors;
 
-        //1ラリーにおけるショットの方向を表す.
+        //1ポイントにおけるショットの方向を表す.
         //偶数番目 : サーバのショット
         //奇数番目 : レシーバのショット
         public List<System.Windows.Vector> ShotDirectionsInRally{get; private set;}
+
+        //1ポイントにおける相手のショットに対する角度を表す
+        //偶数番目 : レシーバからみた角度
+        //奇数番目 : サーバからみた角度
+        public List<double> ShotAngleForOther { get; private set; }
+
+        //1ポイントにおける相手のショットに対する角度を表す
+        //偶数番目 : サーバからみた角度
+        //奇数番目 : レシーバからみた角度
+        public List<double> ShotAngleForMe { get; private set; }
 
         Panel Panel;
 
@@ -96,6 +118,8 @@ namespace Tennis
             MarkColors.Add(Surveyed.RecieverPos, RecieverColor);
 
             ShotDirectionsInRally = new List<System.Windows.Vector>();
+            ShotAngleForMe = new List<double>();
+            ShotAngleForOther = new List<double>();
 
             this.Panel = panel;
             panel.Paint += new System.Windows.Forms.PaintEventHandler(Draw);
@@ -130,8 +154,6 @@ namespace Tennis
         //リストの最新の値とSurveyは同期するようにする.
         public void AddPosition(Point p)
         {
-            Color c = MarkColors[LastSurveyed];
-
             var s = NextSurveying;
             if( !Positions_p.ContainsKey(s))
                 Positions_p.Add(s, new List<Point>());
@@ -145,6 +167,30 @@ namespace Tennis
                 System.Windows.Vector direction = ToVector(hitter[hitter.Count - 2]) - ToVector(hitter[hitter.Count - 1]);
 
                 ShotDirectionsInRally.Add(direction);
+
+                var num = ShotDirectionsInRally.Count;
+                //方向ベクトルが2つ以上あると, 相手のショットに対する角度が出せる
+                if(num > 1)
+                {
+                    // 最新2つの角度を求める(コピー渡しされる)
+                    var vec1 = -ShotDirectionsInRally[num - 2];
+                    var vec2 = ShotDirectionsInRally[num - 1];
+
+                    //ショットの角度を計算
+                    var deg = Math.Abs(ToRoundDown(System.Windows.Vector.AngleBetween(vec1, vec2), 2));
+                    ShotAngleForOther.Add(deg);
+                }
+
+                //3本以上あると, 自分のショットに対する角度が出せる
+                if(num > 2)
+                {
+                    var vec1 = ShotDirectionsInRally[num - 3];
+                    var vec2 = ShotDirectionsInRally[num - 1];
+
+                    //ショットの角度を計算
+                    var deg = Math.Abs(ToRoundDown(System.Windows.Vector.AngleBetween(vec1, vec2), 2));
+                    ShotAngleForMe.Add(deg);
+                }
             }
 
             //被打者orバウンド位置を見ていた場合 => ラリーが増える
@@ -180,7 +226,8 @@ namespace Tennis
                 points.Clear();
 
             ShotDirectionsInRally.Clear();
-
+            ShotAngleForOther.Clear();
+            ShotAngleForMe.Clear();
             RallyNum = 0;
             Panel.Invalidate();
         }
@@ -395,15 +442,11 @@ namespace Tennis
                 {
                     var vec1 = -ShotDirectionsInRally[i - 1];   //コピー渡しされる
                     var vec2 =  ShotDirectionsInRally[i];
- 
-                    //ショットの角度を計算
-                    var deg = Math.Abs(ToRoundDown( System.Windows.Vector.AngleBetween(vec1, vec2), 2));
-
                     //文字を入れる位置
                     vec1.Normalize();
                     vec2.Normalize();
                     var v = -2 * markerSize * (vec1 + vec2);
-                    g.DrawString(deg.ToString() + "°", f, brush, new PointF(hitMark[i].X + (float)v.X, hitMark[i].Y + (float)v.Y), sf);
+                    g.DrawString(ShotAngleForOther[i - 1].ToString() + "°", f, brush, new PointF(hitMark[i].X + (float)v.X, hitMark[i].Y + (float)v.Y), sf);
                 }
 
                 //横に面積を表示
