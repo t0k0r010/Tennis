@@ -86,7 +86,7 @@ namespace Tennis
         //動画を開く
         private void dougaPlayerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MediaPlayer.Instance.Open();
+            //MediaPlayer.Instance.Open();
         }
 
         //プレイヤー位置をクリックしていく

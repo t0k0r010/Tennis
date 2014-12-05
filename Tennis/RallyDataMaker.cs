@@ -71,7 +71,11 @@ namespace Tennis
             const string Left = "Q", Right = "AD";
             const string Service = "K";
 
-
+            var pgDiag = new ProgressDialog();
+            pgDiag.Show();
+            pgDiag.Pg.Minimum = 0;
+            pgDiag.Pg.Maximum = shotSheet.UsedRange.Rows.Count;
+            pgDiag.Pg.Value = 0;
             PointStarts.Clear();
 
             for (int row = 1; row <= shotSheet.UsedRange.Rows.Count; row++ )
@@ -89,8 +93,13 @@ namespace Tennis
                 {
                     PointStarts.Add(row + 1);
                 }
+
+                pgDiag.Pg.Value = row;
             }
-            
+
+            pgDiag.Text = "計算中";
+            pgDiag.Pg.Value = 0;
+
             const int StartRow = 4;
             for(int i=0; i<=20; i+=2)
             {
@@ -99,6 +108,7 @@ namespace Tennis
                 var range = rallySheet.get_Range(col + StartRow, col + (PointStarts.Count + 1));
                 range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeLeft).Weight = Excel.XlBorderWeight.xlThin;
             }
+
             for (int i = 0; i < PointStarts.Count-1; i++ )
             {
                 Excel.Range shotRange = shotSheet.get_Range(Left + PointStarts[i], Right + (PointStarts[i + 1]-1));
@@ -111,8 +121,11 @@ namespace Tennis
 
                 Excel.Range range = rallySheet.get_Range("A" + row, "BM" + row);
                 range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeTop).Weight = Excel.XlBorderWeight.xlThin;
+
+                pgDiag.Pg.Value = PointStarts[i];
             }
 
+            pgDiag.Close();
             MessageBox.Show("変換完了");
 
             return null;
