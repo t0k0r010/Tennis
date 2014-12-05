@@ -131,5 +131,10 @@ namespace Tennis
             }
         }
 
+        private void MakeRallyToolStrip_Click(object sender, EventArgs e)
+        {
+            RallyDataMaker.MakeRally();
+        }
+
     }
 }

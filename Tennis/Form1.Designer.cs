@@ -34,6 +34,7 @@
             this.ClickModeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PlayerPositionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.BoundPositionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.MakeRallyToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.CourtPannel = new System.Windows.Forms.Panel();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
             this.TopPlayerName = new System.Windows.Forms.Label();
@@ -49,7 +50,8 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dougaPlayerToolStripMenuItem,
             this.OpenExelToolStripMenuItem,
-            this.ClickModeMenuItem});
+            this.ClickModeMenuItem,
+            this.MakeRallyToolStrip});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
@@ -93,6 +95,13 @@
             this.BoundPositionMenuItem.Size = new System.Drawing.Size(134, 22);
             this.BoundPositionMenuItem.Text = "バウンド位置";
             this.BoundPositionMenuItem.Click += new System.EventHandler(this.BoundPositionMenuItem_Click);
+            // 
+            // MakeRallyToolStrip
+            // 
+            this.MakeRallyToolStrip.Name = "MakeRallyToolStrip";
+            this.MakeRallyToolStrip.Size = new System.Drawing.Size(116, 20);
+            this.MakeRallyToolStrip.Text = "ShotDataから変換";
+            this.MakeRallyToolStrip.Click += new System.EventHandler(this.MakeRallyToolStrip_Click);
             // 
             // CourtPannel
             // 
@@ -186,6 +195,7 @@
         private System.Windows.Forms.Button ChangeCourtButton;
         private System.Windows.Forms.Panel InputPanel;
         private System.Windows.Forms.Label BottomPlayerName;
+        private System.Windows.Forms.ToolStripMenuItem MakeRallyToolStrip;
     }
 }
 
