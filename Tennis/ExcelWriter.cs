@@ -94,19 +94,27 @@ namespace Tennis
                 }
                 //書き出し
                 var cnt = court.ShotAngleForOther.Count;
-                double serverCnt   =  cnt % 2 == 0 ? cnt/2 : (cnt+1)/2;
-                double recieverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt - 1) / 2;
+                int serverCnt   =  cnt % 2 == 0 ? cnt/2 : (cnt+1)/2;
+                int recieverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt - 1) / 2;
+                int[] counts = { serverCnt, recieverCnt };
                 Excel.Range r = AttackAngleOther.GetRange(Sheet);
-                r.get_Range("A1").Value2 = SumAng[Aindex];   //合計
-                r.get_Range("B1").Value2 = SumAng[Bindex];
-                r.get_Range("C1").Value2 = SumAng[Aindex] / (Aindex == 0 ? serverCnt : recieverCnt);
-                r.get_Range("D1").Value2 = SumAng[Bindex] / (Bindex == 0 ? serverCnt : recieverCnt);
-                r.get_Range("E1").Value2 = MaxAng[Aindex];
-                r.get_Range("F1").Value2 = MaxAng[Bindex];
-                r.get_Range("G1").Value2 = MinAng[Aindex];
-                r.get_Range("H1").Value2 = MinAng[Bindex];
-                r.get_Range("I1").Value2 = MaxAng[Aindex] - MinAng[Aindex];
-                r.get_Range("J1").Value2 = MaxAng[Bindex] - MinAng[Bindex];
+                if( counts[Aindex] > 0)
+                {
+                    r.get_Range("A1").Value2 = SumAng[Aindex];   //合計
+                    r.get_Range("C1").Value2 = SumAng[Aindex] / counts[Aindex];
+                    r.get_Range("E1").Value2 = MaxAng[Aindex];
+                    r.get_Range("G1").Value2 = MinAng[Aindex];
+                    r.get_Range("I1").Value2 = MaxAng[Aindex] - MinAng[Aindex];
+                }
+                if( counts[Bindex] > 0)
+                {
+                    r.get_Range("B1").Value2 = SumAng[Bindex];
+                    r.get_Range("D1").Value2 = SumAng[Bindex] / counts[Bindex];
+                    r.get_Range("F1").Value2 = MaxAng[Bindex];
+                    r.get_Range("H1").Value2 = MinAng[Bindex];
+                    r.get_Range("J1").Value2 = MaxAng[Bindex] - MinAng[Bindex];
+
+                }
 
                 AttackAngleOther.Row++;
 
@@ -129,17 +137,26 @@ namespace Tennis
                 cnt = court.ShotAngleForMe.Count;
                 serverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt + 1) / 2;
                 recieverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt - 1) / 2;
+                counts = new int[]{serverCnt, recieverCnt};
                 r = AttackAngleMe.GetRange(Sheet);
-                r.get_Range("A1").Value2 = SumAng[Aindex];   //合計
-                r.get_Range("B1").Value2 = SumAng[Bindex];
-                r.get_Range("C1").Value2 = SumAng[Aindex] / (Aindex == 0 ? serverCnt : recieverCnt);
-                r.get_Range("D1").Value2 = SumAng[Bindex] / (Bindex == 0 ? serverCnt : recieverCnt);
-                r.get_Range("E1").Value2 = MaxAng[Aindex];
-                r.get_Range("F1").Value2 = MaxAng[Bindex];
-                r.get_Range("G1").Value2 = MinAng[Aindex];
-                r.get_Range("H1").Value2 = MinAng[Bindex];
-                r.get_Range("I1").Value2 = MaxAng[Aindex] - MinAng[Aindex];
-                r.get_Range("J1").Value2 = MaxAng[Bindex] - MinAng[Bindex];
+
+                if( counts[Aindex] > 0)
+                {
+                    r.get_Range("A1").Value2 = SumAng[Aindex];   //合計
+                    r.get_Range("C1").Value2 = SumAng[Aindex] / counts[Aindex];
+                    r.get_Range("E1").Value2 = MaxAng[Aindex];
+                    r.get_Range("G1").Value2 = MinAng[Aindex];
+                    r.get_Range("I1").Value2 = MaxAng[Aindex] - MinAng[Aindex];
+                }
+
+                if( counts[Bindex] > 0)
+                {
+                    r.get_Range("B1").Value2 = SumAng[Bindex];
+                    r.get_Range("D1").Value2 = SumAng[Bindex] / counts[Bindex];
+                    r.get_Range("F1").Value2 = MaxAng[Bindex];
+                    r.get_Range("H1").Value2 = MinAng[Bindex];
+                    r.get_Range("J1").Value2 = MaxAng[Bindex] - MinAng[Bindex];
+                }
 
                 AttackAngleMe.Row++;
                 Excel.Range range = Sheet.get_Range("A" + AttackAngleMe.Row, "CN" + AttackAngleMe.Row);
