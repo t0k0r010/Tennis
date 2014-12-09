@@ -66,7 +66,6 @@ namespace Tennis
             }
         }
 
-        static List<int> PointStarts = new List<int>();
         static Excel.Worksheet ShotToRally(Excel.Worksheet shotSheet, Excel.Worksheet rallySheet)
         {
             const string ShotLeft = "Q", ShotRight = "AD";
@@ -77,8 +76,8 @@ namespace Tennis
             pgDiag.Pg.Minimum = 0;
             pgDiag.Pg.Maximum = shotSheet.UsedRange.Rows.Count;
             pgDiag.Pg.Value = 0;
-            PointStarts.Clear();
-
+            List<int> PointStarts = new List<int>();
+            Console.WriteLine(shotSheet.UsedRange.Rows.Count);
             for (int row = 1; row <= shotSheet.UsedRange.Rows.Count; row++)
             {
                 Excel.Range range = shotSheet.get_Range(ShotLeft + row.ToString());
@@ -120,11 +119,9 @@ namespace Tennis
                 }
             }
 
-            int debugLine = 0;
             bool lastServiceIsA = false;
             for (int i = 0; i < PointStarts.Count - 1; i++)
             {
-                debugLine += PointStarts[i];
                 Excel.Range shotRange = shotSheet.get_Range(ShotLeft + PointStarts[i], ShotRight + (PointStarts[i + 1] - 1));
 
                 int row = StartRow + i;
@@ -138,7 +135,7 @@ namespace Tennis
                 }
                 catch
                 {
-                    MessageBox.Show("Error at " + debugLine + " to " + (debugLine + PointStarts[i + 1]));
+                    MessageBox.Show("Error at " + PointStarts[i]+ " to " + (PointStarts[i + 1]-1));
                     pgDiag.Close();
                     throw;
                 }
