@@ -71,6 +71,7 @@ namespace Tennis
             const string ShotLeft = "Q", ShotRight = "AD";
             const string Service = "K";
 
+            Console.WriteLine(Enum.GetValues(typeof(Kinds)).Length);
             var pgDiag = new ProgressDialog();
             pgDiag.Show();
             pgDiag.Pg.Minimum = 0;
@@ -102,6 +103,7 @@ namespace Tennis
 
             const int StartRow = 4;
 
+            //縦線を引く
             int rallyLastColumn  = rallySheet.UsedRange.Columns.Count;
             int rallyBeginColumn = DataSheet.ColToInt("AS");
             for (int i = rallyBeginColumn; i <= rallyLastColumn; i += 2)
@@ -109,7 +111,7 @@ namespace Tennis
                 string col = DataSheet.IntToCol(i);
                 var range = rallySheet.get_Range(col + StartRow, col + (PointStarts.Count + 1));
 
-                if( (i-rallyBeginColumn) % (DataInfo.NeedCols+1) == 0)
+                if( (i-rallyBeginColumn) % (DataInfo.NeedCols) == 0)
                 {
                     range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeLeft).Weight = Excel.XlBorderWeight.xlThick;
                 }
@@ -119,13 +121,16 @@ namespace Tennis
                 }
             }
 
+            //データを計算する
             bool lastServiceIsA = false;
             for (int i = 0; i < PointStarts.Count - 1; i++)
             {
                 Excel.Range shotRange = shotSheet.get_Range(ShotLeft + PointStarts[i], ShotRight + (PointStarts[i + 1] - 1));
 
                 int row = StartRow + i;
-                Excel.Range rallyRange = rallySheet.get_Range("AS" + row, "BP" + row);
+                var left  = "AS" + row;
+                var right = DataSheet.IntToCol(rallyLastColumn) + row;
+                Excel.Range rallyRange = rallySheet.get_Range(left, right);
 
                 bool serverIsA = shotSheet.get_Range(Service + PointStarts[i]).Value2 != null;
 
@@ -142,7 +147,7 @@ namespace Tennis
 
                 if (i > 0 && lastServiceIsA != serverIsA)
                 {
-                    Excel.Range range = rallySheet.get_Range("A" + row, "BM" + row);
+                    Excel.Range range = rallySheet.get_Range("A" + row, DataSheet.IntToCol(rallyLastColumn) + row);
                     range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeTop).Weight = Excel.XlBorderWeight.xlThin;
                 }
 
@@ -176,6 +181,21 @@ namespace Tennis
             return GetArea(boundPos, hitterPos, otherPos + vec * delta);
         }
 
+
+        enum Kinds
+        {
+            OtherHitAng,        //相手のショットに対する打点座標を用いる角度
+            OtherRecAng,        //相手の被打点座標を用いる角度
+            MeHitterAng,        //自分のショットに対する打点座標を用いる角度
+            OtherHitBigArea,    //相手打点座標による大きい攻撃面積
+            OtherHitSmallArea,  //相手被打点座標による大きい攻撃面積
+            OtherRecBigArea,    //相手打点座標による小さい攻撃面積
+            OtherRecSmallArea,  //相手被打点座標による小さい攻撃面積
+            OppositeHitAng,     //相手の打点座標を用いる角度のうち,逆を突いた分
+            OppositeRecAng,     //相手の被打点座標を用いる角度のうち,逆を突いた分
+            OppositeMeAng,      //自分のショットに対する打点座標を用いる角度のうち,逆を突いた分
+        }
+
         delegate Excel.Range del(int leftInt);
         static void MakeLine(Excel.Range shotRange, Excel.Range rallyRange, bool serverIsA, int rowNum)
         {
@@ -189,48 +209,27 @@ namespace Tennis
             if (rallys.Count < 3)
                 return;
 
-            // 0: サーバー, 1:レシーバー
-            DataInfo[] OtherHitterAng = new DataInfo[2];    //相手のショットに対する打点座標を用いる角度
-            DataInfo[] OtherReciveAng = new DataInfo[2];    //相手の被打点座標を用いる角度
-            DataInfo[] MeHitterAng = new DataInfo[2];    //自分のショットに対する打点座標を用いる角度
-            DataInfo[] OtherHitBigArea = new DataInfo[2];   //相手打点座標による大きい攻撃面積
-            DataInfo[] OtherRecBigArea = new DataInfo[2];   //相手被打点座標による大きい攻撃面積
-            DataInfo[] OtherHitSmallArea = new DataInfo[2]; //相手打点座標による小さい攻撃面積
-            DataInfo[] OtherRecSmallArea = new DataInfo[2]; //相手被打点座標による小さい攻撃面積
+            Dictionary<Kinds, DataInfo[]> Datas = new Dictionary<Kinds, DataInfo[]>();
 
-            del lambda = leftInt => rallyRange.get_Range(DataSheet.IntToCol(leftInt)                    + 1,
-                                                         DataSheet.IntToCol(leftInt + DataInfo.NeedCols) + 1);
-            //個々のインスタンスを作成
-            for (int i = 0; i < 2; i++)
+            int left = DataSheet.ColToInt("A");
+            foreach(Kinds key in Enum.GetValues(typeof(Kinds)))
             {
-                int offset = serverIsA ? i : (i + 1) % 2;
-                int leftInt = DataSheet.ColToInt("A") + offset;
-                OtherHitterAng[i] = new DataInfo( lambda( leftInt ) );
+                // 0: サーバー, 1:レシーバー
+                Datas.Add(key, new DataInfo[2]);
 
-                leftInt += DataInfo.NeedCols + 1;
-                OtherReciveAng[i] = new DataInfo( lambda( leftInt ) );
-
-                leftInt += DataInfo.NeedCols + 1;
-                MeHitterAng[i] = new DataInfo(lambda(leftInt));
-
-                leftInt += DataInfo.NeedCols + 1;
-                OtherHitBigArea[i] = new DataInfo(lambda(leftInt));
-
-                leftInt += DataInfo.NeedCols + 1;
-                OtherHitSmallArea[i] = new DataInfo(lambda(leftInt));
-
-                leftInt += DataInfo.NeedCols + 1;
-                OtherRecBigArea[i] = new DataInfo(lambda(leftInt));
-
-                leftInt += DataInfo.NeedCols + 1;
-                OtherRecSmallArea[i] = new DataInfo(lambda(leftInt));
+                for(int i=0; i<2; i++)
+                {
+                    int offset = serverIsA ? i : (i + 1) % 2;
+                    var range = rallyRange.get_Range(DataSheet.IntToCol(left + offset) + 1,
+                                                     DataSheet.IntToCol(left + offset + DataInfo.NeedCols) + 1);
+                    Datas[key][i] = new DataInfo(range);
+                }
+                left += DataInfo.NeedCols;
             }
-
 
             for (int i = 1; i < rallys.Count; i++)
             {
-                if (rallys[i].HitterPos == null)
-                {
+                if (rallys[i].HitterPos == null){
                     if (i != rallys.Count - 1)
                         Console.WriteLine((rallys.Count - 1 - i) + " from Last is NULL");
                     break;
@@ -241,21 +240,27 @@ namespace Tennis
                 int index_even_0 = i % 2;        //偶数番が0になるインデックス
 
                 var current = rallys[i];
-                var prev1 = rallys[i - 1];
-                var vecHtoH_c = current.HitterPos.v - prev1.HitterPos.v;   //前の打者 -> 今の打者  へのベクトル
+                var prev1   = rallys[i - 1];
+                var vecHtoH_c  = current.HitterPos.v - prev1.HitterPos.v;   //前の打者 -> 今の打者  へのベクトル
                 var vecHtoR_p1 = prev1.RecieverPos.v - prev1.HitterPos.v;   //前の打者 -> 前の被打者へのベクトル
 
                 //相手の被打点座標を用いる角度
-                double angForOtherH = Math.Abs(System.Windows.Vector.AngleBetween(vecHtoH_c, vecHtoR_p1));
-                OtherReciveAng[index_odd_0].Update(angForOtherH);
+                double angForOtherR = Math.Abs(System.Windows.Vector.AngleBetween(vecHtoH_c, vecHtoR_p1));
+                Datas[Kinds.OtherRecAng][index_odd_0].Update(angForOtherR);
+                //一番最初はサーブの角度なので別に保存する
+                if (i == 1)
+                {
+                    var cell = DataSheet.IntToCol(1 + DataInfo.NeedCols * Enum.GetValues(typeof(Kinds)).Length) + 1;
+                    Console.WriteLine(cell);
+                    rallyRange.get_Range(cell).Value2 = angForOtherR;
+                }
 
                 //相手被打点座標による大きい攻撃面積
-                OtherRecBigArea[index_odd_0].Update(GetArea(current.HitterPos.v, prev1.HitterPos.v, prev1.RecieverPos.v));
+                Datas[Kinds.OtherRecBigArea][index_odd_0].Update(GetArea(current.HitterPos.v, prev1.HitterPos.v, prev1.RecieverPos.v));
 
-                if (current.BoundPos != null)
-                {
+                if (current.BoundPos != null){
                     //相手被打点座標による小さい攻撃面積
-                    OtherRecSmallArea[index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev1.RecieverPos.v));
+                    Datas[Kinds.OtherRecSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev1.RecieverPos.v));
                 }
 
                 if (i < 2)
@@ -264,16 +269,23 @@ namespace Tennis
                 //相手のショットに対する,打点座標を用いる角度
                 var prev2 = rallys[i - 2];
                 var vecHtoH_p1 = prev1.HitterPos.v - prev2.HitterPos.v;
-                double angForOtherR = Math.Abs(System.Windows.Vector.AngleBetween(vecHtoH_c, -vecHtoH_p1));
-                OtherHitterAng[index_odd_0].Update(angForOtherR);
+                double angForOtherH = Math.Abs(System.Windows.Vector.AngleBetween(vecHtoH_c, -vecHtoH_p1));
+                Datas[Kinds.OtherHitAng][index_odd_0].Update(angForOtherH);
+
+                //逆を突く形になった場合
+                //別の項目にも保存する.
+                if ((prev1.RecieverPos.v - prev2.HitterPos.v).X * (current.HitterPos.v - prev1.HitterPos.v).X < 0)
+                {
+                    Datas[Kinds.OppositeHitAng][index_odd_0].Update(angForOtherH);
+                    Datas[Kinds.OppositeRecAng][index_odd_0].Update(angForOtherR);
+                }
 
                 // 相手打点座標による大きい攻撃面積
-                OtherHitBigArea[index_odd_0].Update(GetArea(current.HitterPos.v, prev1.HitterPos.v, prev2.HitterPos.v));
+                Datas[Kinds.OtherHitBigArea][index_odd_0].Update(GetArea(current.HitterPos.v, prev1.HitterPos.v, prev2.HitterPos.v));
 
-                if(current.BoundPos != null)
-                {
+                if(current.BoundPos != null){
                     //相手打点座標による小さい攻撃面積
-                    OtherHitSmallArea[index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev2.HitterPos.v));
+                    Datas[Kinds.OtherHitSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev2.HitterPos.v));
                 }
 
                 if (i < 3)
@@ -282,45 +294,21 @@ namespace Tennis
                 var prev3 = rallys[i - 3];
                 var vecHtoH_p2 = prev2.HitterPos.v - prev3.HitterPos.v;
                 double angForMeH = Math.Abs(System.Windows.Vector.AngleBetween(vecHtoH_p2, vecHtoR_p1));
-                MeHitterAng[index_odd_0].Update(angForMeH);
+                Datas[Kinds.MeHitterAng][index_odd_0].Update(angForMeH);
+
+                //逆を突く形になった場合
+                //別の項目にも保存する.
+                if ((prev1.RecieverPos.v - prev2.HitterPos.v).X * (current.HitterPos.v - prev1.HitterPos.v).X < 0)
+                {
+                    Datas[Kinds.OppositeMeAng][index_odd_0].Update(angForMeH);
+                }
             }
 
-            for(int i=0; i<2; i++)
-            {
-                OtherHitterAng[i].Write();
-                OtherReciveAng[i].Write();
-                MeHitterAng[i].Write();
-                OtherHitBigArea[i].Write();
-                OtherHitSmallArea[i].Write();
-                OtherRecBigArea[i].Write();
-                OtherRecSmallArea[i].Write();
+            foreach( var data in Datas.Values) {
+                for(int i=0; i<2; i++) {
+                    data[i].Write();
+                }
             }
-            /*
-            // A プレイヤーA要
-            Excel.Range AngOtherRangeA = rallyRange.get_Range("A1", "K1");
-            Excel.Range AngOtherRangeB = rallyRange.get_Range("B1", "L1");  //一つずれる
-
-            Excel.Range AngMeRangeA = rallyRange.get_Range("M1", "W1");
-            Excel.Range AngMeRangeB = rallyRange.get_Range("N1", "X1");  //一つずれる
-
-            Excel.Range[] AngOtherRange = new Excel.Range[2];
-            Excel.Range[] AngMeRange = new Excel.Range[2];
-            if (serverIsA)
-            {
-                OtherHitterAng[0].Write(AngOtherRangeA);
-                OtherHitterAng[1].Write(AngOtherRangeB);
-
-                OtherReciveAng[0].Write(AngMeRangeA);
-                OtherReciveAng[1].Write(AngMeRangeB);
-            }
-            else
-            {
-                OtherHitterAng[1].Write(AngOtherRangeA);
-                OtherHitterAng[0].Write(AngOtherRangeB);
-
-                OtherReciveAng[1].Write(AngMeRangeA);
-                OtherReciveAng[0].Write(AngMeRangeB);
-            }*/
         }
 
         class RallyInfo
@@ -381,9 +369,9 @@ namespace Tennis
             public double min { get; private set; }
             List<double> datas = new List<double>();
 
-            public const int NeedCols = 11;
+            public const int NeedCols = 12;
 
-            Excel.Range range;
+            public Excel.Range range { get; private set; }
             public DataInfo(Excel.Range r)
             {
                 range = r;
@@ -405,7 +393,7 @@ namespace Tennis
                 datas.Add(data);
             }
 
-            public void Write(/*Excel.Range range*/)
+            public void Write()
             {
                 if (datas.Count == 0)
                     return;
