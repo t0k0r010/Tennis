@@ -191,9 +191,9 @@ namespace Tennis
             OtherHitSmallArea,  //相手被打点座標による大きい攻撃面積
             OtherRecBigArea,    //相手打点座標による小さい攻撃面積
             OtherRecSmallArea,  //相手被打点座標による小さい攻撃面積
-            OppositeHitAng,     //相手の打点座標を用いる角度のうち,逆を突いた分
-            OppositeRecAng,     //相手の被打点座標を用いる角度のうち,逆を突いた分
-            OppositeMeAng,      //自分のショットに対する打点座標を用いる角度のうち,逆を突いた分
+            SurpriseHitAng,     //相手の打点座標を用いる角度のうち,逆を突いた分
+            SurpriseRecAng,     //相手の被打点座標を用いる角度のうち,逆を突いた分
+            SurpriseMeAng,      //自分のショットに対する打点座標を用いる角度のうち,逆を突いた分
         }
 
         delegate Excel.Range del(int leftInt);
@@ -229,29 +229,51 @@ namespace Tennis
 
             for (int i = 1; i < rallys.Count; i++)
             {
-                if (rallys[i].HitterPos == null){
-                    if (i != rallys.Count - 1)
-                        Console.WriteLine((rallys.Count - 1 - i) + " from Last is NULL");
+                //サーバーの角度(面積)かレシーバのかを決めるインデックス
+                int index_odd_0 = (i + 1) % 2;   //奇数番が0になるインデックス
+            
+                var current = rallys[i];
+                var prev1   = rallys[i - 1];
+
+                //最後の打者位置がnullの場合は, バウンド位置を使うものだけ判断する
+                if( current.HitterPos == null)
+                {
+                    if( i != rallys.Count-1)
+                        throw new Exception("入力されていない打選手,被打選手の座標があります");
+
+                    
+                    if (current.BoundPos != null)
+                    {
+                        /*
+                        if (i == 1)
+                            throw new Exception("サーブのバウンド位置は入力する必要があります");
+                         * */
+                        //相手被打点座標による小さい攻撃面積
+                        Datas[Kinds.OtherRecSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev1.RecieverPos.v));
+
+                        //相手打点座標による小さい攻撃面積
+                        if (i > 1)
+                            Datas[Kinds.OtherHitSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, rallys[i - 2].HitterPos.v));
+                    }
+
+                   
                     break;
                 }
 
-                //サーバーの角度(面積)かレシーバのかを決めるインデックス
-                int index_odd_0 = (i + 1) % 2;   //奇数番が0になるインデックス
-                int index_even_0 = i % 2;        //偶数番が0になるインデックス
+                //前の打者 -> 今の打者  へのベクトル
+                var vecHtoH_c  = current.HitterPos.v - prev1.HitterPos.v;
 
-                var current = rallys[i];
-                var prev1   = rallys[i - 1];
-                var vecHtoH_c  = current.HitterPos.v - prev1.HitterPos.v;   //前の打者 -> 今の打者  へのベクトル
-                var vecHtoR_p1 = prev1.RecieverPos.v - prev1.HitterPos.v;   //前の打者 -> 前の被打者へのベクトル
+                //前の打者 -> 前の被打者へのベクトル
+                var vecHtoR_p1 = prev1.RecieverPos.v - prev1.HitterPos.v;
 
                 //相手の被打点座標を用いる角度
-                double angForOtherR = Math.Abs(System.Windows.Vector.AngleBetween(vecHtoH_c, vecHtoR_p1));
+                double angForOtherR = Math.Abs(System.Windows.Vector.AngleBetween(vecHtoH_c, prev1.HitterToReciever));
                 Datas[Kinds.OtherRecAng][index_odd_0].Update(angForOtherR);
+
                 //一番最初はサーブの角度なので別に保存する
                 if (i == 1)
                 {
                     var cell = DataSheet.IntToCol(1 + DataInfo.NeedCols * Enum.GetValues(typeof(Kinds)).Length) + 1;
-                    Console.WriteLine(cell);
                     rallyRange.get_Range(cell).Value2 = angForOtherR;
                 }
 
@@ -263,6 +285,7 @@ namespace Tennis
                     Datas[Kinds.OtherRecSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev1.RecieverPos.v));
                 }
 
+                //以下2ラリー前の座標を用いる情報
                 if (i < 2)
                     continue;
 
@@ -272,12 +295,15 @@ namespace Tennis
                 double angForOtherH = Math.Abs(System.Windows.Vector.AngleBetween(vecHtoH_c, -vecHtoH_p1));
                 Datas[Kinds.OtherHitAng][index_odd_0].Update(angForOtherH);
 
+                //逆を突いたかどうか
+                bool takeSurprise = (prev1.RecieverPos.v.X - prev2.HitterPos.v.X) * (current.HitterPos.v.X - prev1.RecieverPos.v.X) < 0;
+
                 //逆を突く形になった場合
                 //別の項目にも保存する.
-                if ((prev1.RecieverPos.v - prev2.HitterPos.v).X * (current.HitterPos.v - prev1.HitterPos.v).X < 0)
+                if (takeSurprise)
                 {
-                    Datas[Kinds.OppositeHitAng][index_odd_0].Update(angForOtherH);
-                    Datas[Kinds.OppositeRecAng][index_odd_0].Update(angForOtherR);
+                    Datas[Kinds.SurpriseHitAng][index_odd_0].Update(angForOtherH);
+                    Datas[Kinds.SurpriseRecAng][index_odd_0].Update(angForOtherR);
                 }
 
                 // 相手打点座標による大きい攻撃面積
@@ -288,6 +314,8 @@ namespace Tennis
                     Datas[Kinds.OtherHitSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev2.HitterPos.v));
                 }
 
+
+                //以下3ラリー前の座標を用いる場合
                 if (i < 3)
                     continue;
 
@@ -298,9 +326,9 @@ namespace Tennis
 
                 //逆を突く形になった場合
                 //別の項目にも保存する.
-                if ((prev1.RecieverPos.v - prev2.HitterPos.v).X * (current.HitterPos.v - prev1.HitterPos.v).X < 0)
+                if (takeSurprise)
                 {
-                    Datas[Kinds.OppositeMeAng][index_odd_0].Update(angForMeH);
+                    Datas[Kinds.SurpriseMeAng][index_odd_0].Update(angForMeH);
                 }
             }
 
@@ -313,11 +341,19 @@ namespace Tennis
 
         class RallyInfo
         {
-            public Vec2 BoundPos;
+            public Vec2 BoundPos;       //前の選手が打ったショットのバウンド位置
             public Vec2 WinnerPos;
             public Vec2 MissPos;
-            public Vec2 HitterPos;
-            public Vec2 RecieverPos;
+            public Vec2 HitterPos;      //打選手の位置
+            public Vec2 RecieverPos;    //被打選手の位置
+
+            public System.Windows.Vector HitterToReciever
+            {
+                get
+                {
+                    return RecieverPos.v - HitterPos.v;
+                }
+            }
 
             public RallyInfo(Excel.Range range)
             {
