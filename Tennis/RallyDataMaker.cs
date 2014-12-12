@@ -106,21 +106,22 @@ namespace Tennis
             //縦線を引く
             int rallyLastColumn  = rallySheet.UsedRange.Columns.Count;
             int rallyBeginColumn = DataSheet.ColToInt("AS");
-            for (int i = rallyBeginColumn; i <= rallyLastColumn; i += 2)
+            /*
+            int st = rallyBeginColumn;
+            foreach(Kinds key in Enum.GetValues(typeof(Kinds)))
             {
-                string col = DataSheet.IntToCol(i);
-                var range = rallySheet.get_Range(col + StartRow, col + (PointStarts.Count + 1));
+                int len = key == Kinds.SurpriseHitAng || key == Kinds.SurpriseMeAng || key == Kinds.SurpriseRecAng ?
+                       DataInfo.NeedCols + 2 : DataInfo.NeedCols;
+                for(int i=0; i<len; i+=2)
+                {
+                    string col = DataSheet.IntToCol(st+i);
+                    var range = rallySheet.get_Range(col + StartRow, col + (PointStarts.Count + 1));
 
-                if( (i-rallyBeginColumn) % (DataInfo.NeedCols) == 0)
-                {
-                    range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeLeft).Weight = Excel.XlBorderWeight.xlThick;
+                    range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeLeft).Weight = i==0 ? Excel.XlBorderWeight.xlThick : Excel.XlBorderWeight.xlThin;                
                 }
-                else
-                {
-                    range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeLeft).Weight = Excel.XlBorderWeight.xlThin;
-                }
+                st += len;                
             }
-
+            */
             //データを計算する
             bool lastServiceIsA = false;
             for (int i = 0; i < PointStarts.Count - 1; i++)
@@ -194,6 +195,7 @@ namespace Tennis
             SurpriseHitAng,     //相手の打点座標を用いる角度のうち,逆を突いた分
             SurpriseRecAng,     //相手の被打点座標を用いる角度のうち,逆を突いた分
             SurpriseMeAng,      //自分のショットに対する打点座標を用いる角度のうち,逆を突いた分
+            RunningDistance,    //走った距離
         }
 
         delegate Excel.Range del(int leftInt);
@@ -220,11 +222,16 @@ namespace Tennis
                 for(int i=0; i<2; i++)
                 {
                     int offset = serverIsA ? i : (i + 1) % 2;
+
+                    int len = key == Kinds.SurpriseHitAng || key == Kinds.SurpriseMeAng || key == Kinds.SurpriseRecAng ? 
+                        DataInfo.NeedCols-1+2 : DataInfo.NeedCols-1;
+
                     var range = rallyRange.get_Range(DataSheet.IntToCol(left + offset) + 1,
-                                                     DataSheet.IntToCol(left + offset + DataInfo.NeedCols) + 1);
+                                                     DataSheet.IntToCol(left + offset + len) + 1);
                     Datas[key][i] = new DataInfo(range);
                 }
-                left += DataInfo.NeedCols;
+
+                left += Datas[key][0].Cols;
             }
 
             for (int i = 1; i < rallys.Count; i++)
@@ -255,8 +262,6 @@ namespace Tennis
                         if (i > 1)
                             Datas[Kinds.OtherHitSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, rallys[i - 2].HitterPos.v));
                     }
-
-                   
                     break;
                 }
 
@@ -269,13 +274,6 @@ namespace Tennis
                 //相手の被打点座標を用いる角度
                 double angForOtherR = Math.Abs(System.Windows.Vector.AngleBetween(vecHtoH_c, prev1.HitterToReciever));
                 Datas[Kinds.OtherRecAng][index_odd_0].Update(angForOtherR);
-
-                //一番最初はサーブの角度なので別に保存する
-                if (i == 1)
-                {
-                    var cell = DataSheet.IntToCol(1 + DataInfo.NeedCols * Enum.GetValues(typeof(Kinds)).Length) + 1;
-                    rallyRange.get_Range(cell).Value2 = angForOtherR;
-                }
 
                 //相手被打点座標による大きい攻撃面積
                 Datas[Kinds.OtherRecBigArea][index_odd_0].Update(GetArea(current.HitterPos.v, prev1.HitterPos.v, prev1.RecieverPos.v));
@@ -314,6 +312,8 @@ namespace Tennis
                     Datas[Kinds.OtherHitSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev2.HitterPos.v));
                 }
 
+                int index_even_0 = i % 2;
+                Datas[Kinds.RunningDistance][index_even_0].Update((current.HitterPos.v - prev2.HitterPos.v).Length);
 
                 //以下3ラリー前の座標を用いる場合
                 if (i < 3)
@@ -331,6 +331,21 @@ namespace Tennis
                     Datas[Kinds.SurpriseMeAng][index_odd_0].Update(angForMeH);
                 }
             }
+
+            //サーブの角度(相手の被打点情報を使った)
+            if (Datas[Kinds.OtherHitAng][0].datas.Count > 0)
+                rallyRange.get_Range(DataSheet.IntToCol(left) + 1).Value2 = Datas[Kinds.OtherHitAng][0].datas[0];
+
+            if( Datas[Kinds.OtherRecAng][0].datas.Count > 0)            
+                rallyRange.get_Range(DataSheet.IntToCol(left+1) + 1).Value2 = Datas[Kinds.OtherRecAng][0].datas[0];
+            
+
+            //レシーバの角度
+            if( Datas[Kinds.OtherHitAng][1].datas.Count > 0)
+                rallyRange.get_Range(DataSheet.IntToCol(left+2) + 1).Value2 = Datas[Kinds.OtherHitAng][1].datas[0];
+
+            if(Datas[Kinds.OtherRecAng][1].datas.Count > 0)
+                rallyRange.get_Range(DataSheet.IntToCol(left + 3) + 1).Value2 = Datas[Kinds.OtherRecAng][1].datas[0];
 
             foreach( var data in Datas.Values) {
                 for(int i=0; i<2; i++) {
@@ -403,13 +418,17 @@ namespace Tennis
             public double sum { get; private set; }
             public double max { get; private set; }
             public double min { get; private set; }
-            List<double> datas = new List<double>();
+            public List<double> datas { get; private set; }
 
             public const int NeedCols = 12;
 
+            public int Cols { get; private set; }
             public Excel.Range range { get; private set; }
-            public DataInfo(Excel.Range r)
+            public DataInfo(Excel.Range r, bool cntCols = false)
             {
+                datas = new List<double>();
+
+                Cols = r.Columns.Count;
                 range = r;
                 sum = 0;
                 max = -1000;
@@ -433,7 +452,7 @@ namespace Tennis
             {
                 if (datas.Count == 0)
                     return;
-
+                
                 double mean = sum / (double)datas.Count;
                 range.get_Range("A1").Value2 = sum;
                 range.get_Range("C1").Value2 = mean;
@@ -448,6 +467,9 @@ namespace Tennis
                     vari += Math.Pow(mean - deg, 2);
 
                 range.get_Range("K1").Value2 = Math.Sqrt(vari / (double)datas.Count);
+                
+                if (Cols > NeedCols)
+                    range.get_Range("M1").Value2 = datas.Count;
             }
         }
     }
