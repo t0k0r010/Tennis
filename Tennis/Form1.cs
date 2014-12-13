@@ -32,8 +32,11 @@ namespace Tennis
             court       = new Court(this.CourtPannel);
 
             this.CourtPannel.MouseClick += ClickCourt;
+            this.CourtPannel.MouseMove += MoveMouse;
             this.KeyDown += Form1_KeyDown;
             this.Resize  += Form1_Resize;
+
+            PosLabel.MouseMove += MoveMouse;
         }
 
         void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -41,6 +44,10 @@ namespace Tennis
             
         }
 
+        void MoveMouse(object sender, MouseEventArgs e)
+        {
+            PosLabel.Text = court.ToRealUnit(e.Location).ToString();
+        }
         void ClickCourt(object sender, MouseEventArgs e)
         {
             if (!Form1.IsStarted)

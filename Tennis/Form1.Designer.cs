@@ -36,12 +36,14 @@
             this.BoundPositionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MakeRallyToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.CourtPannel = new System.Windows.Forms.Panel();
+            this.PosLabel = new System.Windows.Forms.Label();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
             this.TopPlayerName = new System.Windows.Forms.Label();
             this.InputPanel = new System.Windows.Forms.Panel();
             this.BottomPlayerName = new System.Windows.Forms.Label();
             this.ChangeCourtButton = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
+            this.CourtPannel.SuspendLayout();
             this.InputPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -69,8 +71,8 @@
             // OpenExelToolStripMenuItem
             // 
             this.OpenExelToolStripMenuItem.Name = "OpenExelToolStripMenuItem";
-            this.OpenExelToolStripMenuItem.Size = new System.Drawing.Size(83, 20);
-            this.OpenExelToolStripMenuItem.Text = "エクセルを開く";
+            this.OpenExelToolStripMenuItem.Size = new System.Drawing.Size(157, 20);
+            this.OpenExelToolStripMenuItem.Text = "新しくショットデータを作成する";
             this.OpenExelToolStripMenuItem.Click += new System.EventHandler(this.OpenExelToolStripMenuItem_Click);
             // 
             // ClickModeMenuItem
@@ -110,11 +112,21 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.CourtPannel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CourtPannel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.CourtPannel.Controls.Add(this.PosLabel);
             this.CourtPannel.Location = new System.Drawing.Point(11, 28);
             this.CourtPannel.Margin = new System.Windows.Forms.Padding(2);
             this.CourtPannel.Name = "CourtPannel";
             this.CourtPannel.Size = new System.Drawing.Size(428, 582);
             this.CourtPannel.TabIndex = 3;
+            // 
+            // PosLabel
+            // 
+            this.PosLabel.AutoSize = true;
+            this.PosLabel.Location = new System.Drawing.Point(4, 4);
+            this.PosLabel.Name = "PosLabel";
+            this.PosLabel.Size = new System.Drawing.Size(35, 12);
+            this.PosLabel.TabIndex = 0;
+            this.PosLabel.Text = "label1";
             // 
             // openFileDialog2
             // 
@@ -173,6 +185,8 @@
             this.Text = "Form1";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.CourtPannel.ResumeLayout(false);
+            this.CourtPannel.PerformLayout();
             this.InputPanel.ResumeLayout(false);
             this.InputPanel.PerformLayout();
             this.ResumeLayout(false);
@@ -196,6 +210,7 @@
         private System.Windows.Forms.Panel InputPanel;
         private System.Windows.Forms.Label BottomPlayerName;
         private System.Windows.Forms.ToolStripMenuItem MakeRallyToolStrip;
+        private System.Windows.Forms.Label PosLabel;
     }
 }
 

@@ -174,8 +174,8 @@ namespace Tennis
             OtherRecAng,        //相手の被打点座標を用いる角度
             MeHitterAng,        //自分のショットに対する打点座標を用いる角度
             OtherHitBigArea,    //相手打点座標による大きい攻撃面積
-            OtherHitSmallArea,  //相手被打点座標による大きい攻撃面積
-            OtherRecBigArea,    //相手打点座標による小さい攻撃面積
+            OtherHitSmallArea,  //相手打点座標による小さい攻撃面積
+            OtherRecBigArea,    //相手被打点座標による大きい攻撃面積
             OtherRecSmallArea,  //相手被打点座標による小さい攻撃面積
             SurpriseHitAng,     //相手の打点座標を用いる角度のうち,逆を突いた分
             SurpriseRecAng,     //相手の被打点座標を用いる角度のうち,逆を突いた分
@@ -327,7 +327,6 @@ namespace Tennis
                 {
                     throw new Exception("サーブのバウンド位置が入力されていません");
                 }
-                Console.WriteLine(rallys[1].BoundPos.v);
                 rallyRange.get_Range(DataSheet.IntToCol(left) + 1).Value2 = Math.Abs(System.Windows.Vector.AngleBetween(
                     rallys[1].BoundPos.v - rallys[0].HitterPos.v, rallys[0].HitterToReciever));
             }
