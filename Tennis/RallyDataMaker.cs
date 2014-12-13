@@ -139,9 +139,9 @@ namespace Tennis
                 {
                     MakeLine(shotRange, rallyRange, serverIsA, PointStarts[i + 1] - PointStarts[i]);
                 }
-                catch
+                catch(Exception e)
                 {
-                    MessageBox.Show("Error at " + PointStarts[i]+ " to " + (PointStarts[i + 1]-1));
+                    MessageBox.Show("Error at " + PointStarts[i]+ " to " + (PointStarts[i + 1]-1) + "\n" + e.Message);
                     pgDiag.Close();
                     throw;
                 }
@@ -208,7 +208,8 @@ namespace Tennis
                 rallys.Add(info);
             }
 
-            if (rallys.Count < 3)
+            //1行の時(ダブルフォルト)の時は何も書かずに飛ばす
+            if (rallys.Count <= 1)
                 return;
 
             Dictionary<Kinds, DataInfo[]> Datas = new Dictionary<Kinds, DataInfo[]>();
@@ -251,10 +252,6 @@ namespace Tennis
                     
                     if (current.BoundPos != null)
                     {
-                        /*
-                        if (i == 1)
-                            throw new Exception("サーブのバウンド位置は入力する必要があります");
-                         * */
                         //相手被打点座標による小さい攻撃面積
                         Datas[Kinds.OtherRecSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev1.RecieverPos.v));
 
@@ -332,20 +329,25 @@ namespace Tennis
                 }
             }
 
-            //サーブの角度(相手の被打点情報を使った)
-            if (Datas[Kinds.OtherHitAng][0].datas.Count > 0)
-                rallyRange.get_Range(DataSheet.IntToCol(left) + 1).Value2 = Datas[Kinds.OtherHitAng][0].datas[0];
-
-            if( Datas[Kinds.OtherRecAng][0].datas.Count > 0)            
-                rallyRange.get_Range(DataSheet.IntToCol(left+1) + 1).Value2 = Datas[Kinds.OtherRecAng][0].datas[0];
-            
+            //ダブルフォルトじゃない場合
+            //サーブの角度を追加
+            if( rallys.Count > 1 )
+            {
+                if(rallys[1].BoundPos == null)
+                {
+                    throw new Exception("サーブのバウンド位置が入力されていません");
+                }
+                Console.WriteLine(rallys[1].BoundPos.v);
+                rallyRange.get_Range(DataSheet.IntToCol(left) + 1).Value2 = Math.Abs(System.Windows.Vector.AngleBetween(
+                    rallys[1].BoundPos.v - rallys[0].HitterPos.v, rallys[0].HitterToReciever));
+            }
 
             //レシーバの角度
             if( Datas[Kinds.OtherHitAng][1].datas.Count > 0)
-                rallyRange.get_Range(DataSheet.IntToCol(left+2) + 1).Value2 = Datas[Kinds.OtherHitAng][1].datas[0];
+                rallyRange.get_Range(DataSheet.IntToCol(left+1) + 1).Value2 = Datas[Kinds.OtherHitAng][1].datas[0];
 
             if(Datas[Kinds.OtherRecAng][1].datas.Count > 0)
-                rallyRange.get_Range(DataSheet.IntToCol(left + 3) + 1).Value2 = Datas[Kinds.OtherRecAng][1].datas[0];
+                rallyRange.get_Range(DataSheet.IntToCol(left + 2) + 1).Value2 = Datas[Kinds.OtherRecAng][1].datas[0];
 
             foreach( var data in Datas.Values) {
                 for(int i=0; i<2; i++) {
