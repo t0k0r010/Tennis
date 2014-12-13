@@ -106,22 +106,7 @@ namespace Tennis
             //縦線を引く
             int rallyLastColumn  = rallySheet.UsedRange.Columns.Count;
             int rallyBeginColumn = DataSheet.ColToInt("AS");
-            /*
-            int st = rallyBeginColumn;
-            foreach(Kinds key in Enum.GetValues(typeof(Kinds)))
-            {
-                int len = key == Kinds.SurpriseHitAng || key == Kinds.SurpriseMeAng || key == Kinds.SurpriseRecAng ?
-                       DataInfo.NeedCols + 2 : DataInfo.NeedCols;
-                for(int i=0; i<len; i+=2)
-                {
-                    string col = DataSheet.IntToCol(st+i);
-                    var range = rallySheet.get_Range(col + StartRow, col + (PointStarts.Count + 1));
 
-                    range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeLeft).Weight = i==0 ? Excel.XlBorderWeight.xlThick : Excel.XlBorderWeight.xlThin;                
-                }
-                st += len;                
-            }
-            */
             //データを計算する
             bool lastServiceIsA = false;
             for (int i = 0; i < PointStarts.Count - 1; i++)
@@ -195,7 +180,8 @@ namespace Tennis
             SurpriseHitAng,     //相手の打点座標を用いる角度のうち,逆を突いた分
             SurpriseRecAng,     //相手の被打点座標を用いる角度のうち,逆を突いた分
             SurpriseMeAng,      //自分のショットに対する打点座標を用いる角度のうち,逆を突いた分
-            RunningDistance,    //走った距離
+            RunningDistanceHitToHit,    //前回の打点から今回の打点までの走った距離
+            RunningDistanceHitToRec     //被打点から打点までの距離
         }
 
         delegate Excel.Range del(int leftInt);
@@ -239,7 +225,8 @@ namespace Tennis
             {
                 //サーバーの角度(面積)かレシーバのかを決めるインデックス
                 int index_odd_0 = (i + 1) % 2;   //奇数番が0になるインデックス
-            
+                int index_even_0 = i % 2;       //偶数番が0になるインデックス
+
                 var current = rallys[i];
                 var prev1   = rallys[i - 1];
 
@@ -280,6 +267,9 @@ namespace Tennis
                     Datas[Kinds.OtherRecSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev1.RecieverPos.v));
                 }
 
+                //被打点 -> 打点の距離
+                Datas[Kinds.RunningDistanceHitToRec][index_even_0].Update((current.HitterPos.v - prev1.RecieverPos.v).Length);
+
                 //以下2ラリー前の座標を用いる情報
                 if (i < 2)
                     continue;
@@ -309,8 +299,8 @@ namespace Tennis
                     Datas[Kinds.OtherHitSmallArea][index_odd_0].Update(GetSmallArea(current.BoundPos.v, prev1.HitterPos.v, prev2.HitterPos.v));
                 }
 
-                int index_even_0 = i % 2;
-                Datas[Kinds.RunningDistance][index_even_0].Update((current.HitterPos.v - prev2.HitterPos.v).Length);
+                //打点 -> 打点の距離
+                Datas[Kinds.RunningDistanceHitToHit][index_even_0].Update((current.HitterPos.v - prev2.HitterPos.v).Length);
 
                 //以下3ラリー前の座標を用いる場合
                 if (i < 3)
