@@ -357,7 +357,7 @@ namespace Tennis
             {
                 wb.Close(false);
                 app.Quit();
-                throw new Exception();
+                throw ex;
             }
         }
 
