@@ -18,7 +18,6 @@ namespace Tennis
     using Excel = Microsoft.Office.Interop.Excel;
     class ExcelWriter
     {
-        static ExcelWriter instance = null;
         public static ExcelWriter Instance
         {
             get;
@@ -31,15 +30,155 @@ namespace Tennis
         public class RallyDataSheet : DataSheet
         {
             public bool IsHitter { get; private set; }
+
+            DataLabel AttackAngleMe;    //自分に対する攻撃角度
+            DataLabel AttackAngleOther; //相手に対する攻撃角度
+
             public RallyDataSheet(Excel.Worksheet sheet, int labelRowHeight)
                 : base(sheet, labelRowHeight)
             {
                 IsHitter = false;
+
+                AttackAngleOther = new DataLabel("AS", "BB", LabelRowHeight+1);
+                AttackAngleMe = new DataLabel("BC", "BL", +LabelRowHeight+1);
             }
 
             public override void SetPosition(string time, PointF point)
             {
+
             }
+
+            public void EndRally()
+            {
+                Court court = Court.Instance;
+                int rallyNum = court.RallyNum;
+
+                var shots = court.ShotDirectionsInRally;
+                var shotAngleForOther = court.ShotAngleForOther;
+                var shotAngleForMe = court.ShotAngleForMe;
+                var hitterPoint = court.Positions_p[Court.Surveyed.HitterPos];
+
+                //バウンドを見ている場合はやらなくていい
+                if (hitterPoint.Count == 0)
+                    return;
+
+                // 0 : サーバー, 1 : レシーバー
+                double[] SumAng = {0,0};
+                double[] MaxAng = { 0, 0};
+                double[] MinAng = {1000, 1000};
+
+                //プレイヤーAはサーバーかレシーバか
+                int Aindex = 0;
+
+                //サーバーがコートの下側で, 上側のプレイヤーがAのとき
+                //もしくは,サーバーがコートの上側で,上側のプレイヤーがBの時Aはレシーバー
+                if ((hitterPoint[0].Y < 0 && court.UpperPlayer == Court.Players.PlayerA) ||
+                    (hitterPoint[0].Y > 0 && court.UpperPlayer == Court.Players.PlayerB))
+                    Aindex = 1;
+
+                int Bindex = (Aindex + 1) % 2;  //Aと逆
+
+                //相手に対する角度を出す
+                for(int i=0; i<court.ShotAngleForOther.Count; i++)
+                {
+                    //偶数番目がレシーバー
+                    int k = 1 - i % 2;
+                    var deg = court.ShotAngleForOther[i];
+                    SumAng[k] += deg;
+
+                    if (MaxAng[k] < deg)
+                        MaxAng[k] = deg;
+
+                    if (MinAng[k] > deg)
+                        MinAng[k] = deg;
+                }
+                //書き出し
+                var cnt = court.ShotAngleForOther.Count;
+                int serverCnt   =  cnt % 2 == 0 ? cnt/2 : (cnt+1)/2;
+                int recieverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt - 1) / 2;
+                int[] counts = { serverCnt, recieverCnt };
+                Excel.Range r = AttackAngleOther.GetRange(Sheet);
+                if( counts[Aindex] > 0)
+                {
+                    r.get_Range("A1").Value2 = SumAng[Aindex];   //合計
+                    r.get_Range("C1").Value2 = SumAng[Aindex] / counts[Aindex];
+                    r.get_Range("E1").Value2 = MaxAng[Aindex];
+                    r.get_Range("G1").Value2 = MinAng[Aindex];
+                    r.get_Range("I1").Value2 = MaxAng[Aindex] - MinAng[Aindex];
+                }
+                if( counts[Bindex] > 0)
+                {
+                    r.get_Range("B1").Value2 = SumAng[Bindex];
+                    r.get_Range("D1").Value2 = SumAng[Bindex] / counts[Bindex];
+                    r.get_Range("F1").Value2 = MaxAng[Bindex];
+                    r.get_Range("H1").Value2 = MinAng[Bindex];
+                    r.get_Range("J1").Value2 = MaxAng[Bindex] - MinAng[Bindex];
+
+                }
+
+                AttackAngleOther.Row++;
+
+                //自分に対する角度を出す
+                for (int i = 0; i < court.ShotAngleForMe.Count; i++ )
+                {
+                    //偶数番目がサーバー
+                    int k = i % 2;
+
+                    var deg = court.ShotAngleForMe[i];
+                    SumAng[k] += deg;
+
+                    if (MaxAng[k] < deg)
+                        MaxAng[k] = deg;
+
+                    if (MinAng[k] > deg)
+                        MinAng[k] = deg;
+                }
+
+                cnt = court.ShotAngleForMe.Count;
+                serverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt + 1) / 2;
+                recieverCnt = cnt % 2 == 0 ? cnt / 2 : (cnt - 1) / 2;
+                counts = new int[]{serverCnt, recieverCnt};
+                r = AttackAngleMe.GetRange(Sheet);
+
+                if( counts[Aindex] > 0)
+                {
+                    r.get_Range("A1").Value2 = SumAng[Aindex];   //合計
+                    r.get_Range("C1").Value2 = SumAng[Aindex] / counts[Aindex];
+                    r.get_Range("E1").Value2 = MaxAng[Aindex];
+                    r.get_Range("G1").Value2 = MinAng[Aindex];
+                    r.get_Range("I1").Value2 = MaxAng[Aindex] - MinAng[Aindex];
+                }
+
+                if( counts[Bindex] > 0)
+                {
+                    r.get_Range("B1").Value2 = SumAng[Bindex];
+                    r.get_Range("D1").Value2 = SumAng[Bindex] / counts[Bindex];
+                    r.get_Range("F1").Value2 = MaxAng[Bindex];
+                    r.get_Range("H1").Value2 = MinAng[Bindex];
+                    r.get_Range("J1").Value2 = MaxAng[Bindex] - MinAng[Bindex];
+                }
+
+                AttackAngleMe.Row++;
+                Excel.Range range = Sheet.get_Range("A" + AttackAngleMe.Row, "CN" + AttackAngleMe.Row);
+                range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeTop).Weight = Excel.XlBorderWeight.xlMedium;
+            }
+
+            public void Update()
+            {
+                Court court  = Court.Instance;
+                int rallyNum = court.RallyNum;
+
+                var shots = court.ShotDirectionsInRally;
+
+                //ラリーが2回未満なら角度が出せない
+                if (shots.Count < 2)
+                    return;
+
+                //2つのベクトルの角度を求める
+                var angleOther = System.Windows.Vector.AngleBetween(shots[shots.Count - 1], shots[shots.Count - 2]);
+                var rangeOther = AttackAngleOther.GetRange(Sheet);
+            }
+
         };
 
         public class ShotDataSheet : DataSheet
@@ -50,6 +189,7 @@ namespace Tennis
                 BoundPos,   //バウンド位置
                 PlayerPos   //プレイヤー位置
             };
+
             public Surveyed Surveying { get; set; }
             public bool IsHitter { get; private set; }
 
@@ -61,17 +201,28 @@ namespace Tennis
                 : base(sheet, labelRowHeight)
             {
                 IsHitter = true;
-                PlayerPos   = new DataLabel("AD", "AG", LabelRowHeight+1);
-                BoundPos    = new DataLabel("AB", "AC", LabelRowHeight+1);
+                PlayerPos   = new DataLabel("AA", "AD", LabelRowHeight+1);
+                BoundPos    = new DataLabel( "Q",  "R", LabelRowHeight+1);
                 AttackAngle = new DataLabel("AL", "AL", LabelRowHeight + 1);
             }
 
             public override void SetPosition(string time, PointF point)
             {
-                if (Surveying == Surveyed.BoundPos)
-                    SetBoundPosition(time, point);
-                else
-                    SetPlayerPosition(time, point);
+                var court = Court.Instance;
+                switch(court.LastSurveyed)
+                {
+                    case Court.Surveyed.BoundPos:
+                        base.SetPosition(BoundPos.GetRange(Sheet), time, point);
+                        BoundPos.Row++;
+                        break;
+                    case Court.Surveyed.HitterPos:
+                        base.SetPosition(PlayerPos.GetRange(Sheet).get_Range("A1", "B1"), time, point);
+                        break;
+                    case Court.Surveyed.RecieverPos:
+                        base.SetPosition(PlayerPos.GetRange(Sheet).get_Range("C1", "D1"), time, point);
+                        PlayerPos.Row++;
+                        break;
+                }
             }
 
             //ラリーの終わりの表す線を書き込む
@@ -86,7 +237,7 @@ namespace Tennis
 
             void SetBoundPosition(string time, PointF p)
             {
-                SetPosition(Sheet.get_Range(BoundPos.LeftCol + BoundPos.Row, BoundPos.RightCol + BoundPos.Row), time, p);
+                base.SetPosition(Sheet.get_Range(BoundPos.LeftCol + BoundPos.Row, BoundPos.RightCol + BoundPos.Row), time, p);
                 BoundPos.Row++;
             }
 
@@ -95,8 +246,7 @@ namespace Tennis
                 Excel.Range r = Sheet.get_Range(PlayerPos.LeftCol + PlayerPos.Row, PlayerPos.RightCol + PlayerPos.Row);
 
                 Excel.Range range = IsHitter ? r.get_Range("A1" , "B1") : r.get_Range("C1" , "D1");
-                SetPosition(range, time, p);
-
+                base.SetPosition(range, time, p);
                 IsHitter = !IsHitter;
 
                 if (!IsHitter){
@@ -141,10 +291,9 @@ namespace Tennis
             }
         };
 
+
         public ShotDataSheet shotSheet { get; private set; }
-
         public RallyDataSheet rallySheet { get; private set; }
-
         //ファイルを開く
         public static void Open()
         {
@@ -201,14 +350,14 @@ namespace Tennis
             {
                 CopyTemplate(app, wb);  //新しく作る場合
 
-                rallySheet = new RallyDataSheet(wb.Sheets[2], 3);
-                shotSheet = new ShotDataSheet(wb.Sheets[1], 4);
+                shotSheet  = new ShotDataSheet(wb.Sheets[1], 4);
+                rallySheet = new RallyDataSheet(wb.Sheets[3], 3);
             }
             catch (Exception ex)
             {
                 wb.Close(false);
                 app.Quit();
-                throw new Exception();
+                throw ex;
             }
         }
 

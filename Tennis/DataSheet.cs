@@ -80,6 +80,11 @@ namespace Tennis
                 RightCol = right;
                 Row = row;
             }
+
+            public Microsoft.Office.Interop.Excel.Range GetRange(Microsoft.Office.Interop.Excel.Worksheet sheet)
+            {
+                return sheet.get_Range(LeftCol + Row, RightCol + Row);
+            }
         }
     };
 }
