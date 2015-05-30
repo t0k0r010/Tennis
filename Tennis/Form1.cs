@@ -48,11 +48,20 @@ namespace Tennis
 
             ExcelWriter writer = ExcelWriter.Instance;
             Point p = new Point(e.X, e.Y);
+
+            string str = writer.shotSheet.Sheet.get_Range("B1").Value2;
+            Console.WriteLine(str);
+            writer.shotSheet.Sheet.get_Range("B1").Value2 = "Test";
+            str = writer.shotSheet.Sheet.get_Range("B1").Value2;
+            Console.WriteLine(str);
+            //左クリックで点の追加
             if( e.Button == MouseButtons.Left )
             {
                 court.AddPosition(p);                                    //コートに新しい位置を追加
                 writer.shotSheet.SetPosition("", court.ToRealUnit(p));
             }
+
+            //右クリックでエクセルに書き出し
             else if(e.Button == MouseButtons.Right)
             {
                 if(court.LastSurveyed != Court.Surveyed.BoundPos && 
@@ -120,13 +129,13 @@ namespace Tennis
             if(court.UpperPlayer == Court.Players.PlayerA)
             {
                 court.UpperPlayer = Court.Players.PlayerB;
-                TopPlayerName.Text = "Player B";
+                TopPlayerName.Text    = "Player B";
                 BottomPlayerName.Text = "Player A";
             }
             else
             {
                 court.UpperPlayer = Court.Players.PlayerA;
-                TopPlayerName.Text = "Player A";
+                TopPlayerName.Text    = "Player A";
                 BottomPlayerName.Text = "Player B";
             }
         }

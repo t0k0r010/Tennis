@@ -193,7 +193,7 @@ namespace Tennis
             public Surveyed Surveying { get; set; }
             public bool IsHitter { get; private set; }
 
-            DataLabel BoundPos, PlayerPos, AttackAngle;
+            DataLabel BoundPos_, PlayerPos_, AttackAngle;
 
             int rallyNum = 0;   //ラリー回数
 
@@ -201,8 +201,8 @@ namespace Tennis
                 : base(sheet, labelRowHeight)
             {
                 IsHitter = true;
-                PlayerPos   = new DataLabel("AA", "AD", LabelRowHeight+1);
-                BoundPos    = new DataLabel( "Q",  "R", LabelRowHeight+1);
+                PlayerPos_   = new DataLabel("AA", "AD", LabelRowHeight+1);
+                BoundPos_    = new DataLabel( "Q",  "R", LabelRowHeight+1);
                 AttackAngle = new DataLabel("AL", "AL", LabelRowHeight + 1);
             }
 
@@ -212,15 +212,15 @@ namespace Tennis
                 switch(court.LastSurveyed)
                 {
                     case Court.Surveyed.BoundPos:
-                        base.SetPosition(BoundPos.GetRange(Sheet), time, point);
-                        BoundPos.Row++;
+                        base.SetPosition(BoundPos_.GetRange(Sheet), time, point);
+                        BoundPos_.Row++;
                         break;
                     case Court.Surveyed.HitterPos:
-                        base.SetPosition(PlayerPos.GetRange(Sheet).get_Range("A1", "B1"), time, point);
+                        base.SetPosition(PlayerPos_.GetRange(Sheet).get_Range("A1", "B1"), time, point);
                         break;
                     case Court.Surveyed.RecieverPos:
-                        base.SetPosition(PlayerPos.GetRange(Sheet).get_Range("C1", "D1"), time, point);
-                        PlayerPos.Row++;
+                        base.SetPosition(PlayerPos_.GetRange(Sheet).get_Range("C1", "D1"), time, point);
+                        PlayerPos_.Row++;
                         break;
                 }
             }
@@ -228,7 +228,7 @@ namespace Tennis
             //ラリーの終わりの表す線を書き込む
             public void EndRally()
             {
-                int row = Surveying == Surveyed.BoundPos? BoundPos.Row : PlayerPos.Row;
+                int row = Surveying == Surveyed.BoundPos? BoundPos_.Row : PlayerPos_.Row;
                 Excel.Range range = Sheet.get_Range("A" + row, "CN" + row);
                 range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeTop).Weight = Excel.XlBorderWeight.xlMedium;
 
@@ -237,13 +237,13 @@ namespace Tennis
 
             void SetBoundPosition(string time, PointF p)
             {
-                base.SetPosition(Sheet.get_Range(BoundPos.LeftCol + BoundPos.Row, BoundPos.RightCol + BoundPos.Row), time, p);
-                BoundPos.Row++;
+                base.SetPosition(Sheet.get_Range(BoundPos_.LeftCol + BoundPos_.Row, BoundPos_.RightCol + BoundPos_.Row), time, p);
+                BoundPos_.Row++;
             }
 
             void SetPlayerPosition(string time, PointF p)
             {
-                Excel.Range r = Sheet.get_Range(PlayerPos.LeftCol + PlayerPos.Row, PlayerPos.RightCol + PlayerPos.Row);
+                Excel.Range r = Sheet.get_Range(PlayerPos_.LeftCol + PlayerPos_.Row, PlayerPos_.RightCol + PlayerPos_.Row);
 
                 Excel.Range range = IsHitter ? r.get_Range("A1" , "B1") : r.get_Range("C1" , "D1");
                 base.SetPosition(range, time, p);
@@ -260,24 +260,24 @@ namespace Tennis
                 //被打選手の設定が終われば次の行へ
                 if (IsHitter)
                 {
-                    PlayerPos.Row++;                    
+                    PlayerPos_.Row++;                    
                     rallyNum++;
                 }
             }
 
             void SetAttackAngle()
             {
-                Excel.Range range = Sheet.get_Range( AttackAngle.LeftCol + (PlayerPos.Row - 1) );
+                Excel.Range range = Sheet.get_Range( AttackAngle.LeftCol + (PlayerPos_.Row - 1) );
 
-                string l = PlayerPos.LeftCol;
-                string r = IntToCol(ColToInt(PlayerPos.LeftCol) + 1);
+                string l = PlayerPos_.LeftCol;
+                string r = IntToCol(ColToInt(PlayerPos_.LeftCol) + 1);
 
-                string ax = l + (PlayerPos.Row-2);
-                string ay = r + (PlayerPos.Row - 2);
-                string bx = l + (PlayerPos.Row - 1);
-                string by = r + (PlayerPos.Row - 1);
-                string cx = l + (PlayerPos.Row - 0);
-                string cy = r + (PlayerPos.Row - 0);
+                string ax = l + (PlayerPos_.Row-2);
+                string ay = r + (PlayerPos_.Row - 2);
+                string bx = l + (PlayerPos_.Row - 1);
+                string by = r + (PlayerPos_.Row - 1);
+                string cx = l + (PlayerPos_.Row - 0);
+                string cy = r + (PlayerPos_.Row - 0);
                 string Ax = "(" + ax + "-" + bx + ")";  //1本目のベクトル
                 string Ay = "(" + ay + "-" + by + ")";
                 string Bx = "(" + cx + "-" + bx + ")";  //2本目のベクトル
@@ -371,7 +371,7 @@ namespace Tennis
                 foreach (Excel.Worksheet ws in wb.Sheets)                
                     sheets.Add(ws.Name);                   
                 
-                string fileName = System.IO.Directory.GetCurrentDirectory() + "/template.xlsx";
+                string fileName = System.IO.Directory.GetCurrentDirectory() + "/../../../Settings/template.xlsx";
                 var fromwb = ap.Workbooks.Open(Filename: fileName, ReadOnly: true);
   
                 foreach (Excel.Worksheet ws in wb.Sheets)
